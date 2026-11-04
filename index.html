@@ -249,6 +249,37 @@
     /* YÜKLENME GÖSTERGESİ */
     .ld{text-align:center;padding:40px;color:#888;font-size:.9rem}
     .ldm{text-align:center;padding:20px;color:#888;font-size:.85rem}
+  
+    /* ---- YouTube Android benzeri ek stiller ---- */
+    *{-webkit-tap-highlight-color:transparent}
+    .vc{content-visibility:auto;contain-intrinsic-size:auto 280px}
+    .nb:active,.chip:active,.pfr:active,.cs-i:active{opacity:.6}
+    .cbn{height:98px;background:#e5e5e5 center/cover no-repeat}
+    .ci{display:flex;gap:14px;align-items:center;padding:14px 16px 6px}
+    .ci img{width:76px;height:76px;border-radius:50%;object-fit:cover;flex:none}
+    .ci h2{font-size:1.3rem;line-height:1.2}
+    .cm{font-size:.8rem;color:#606060;margin-top:3px;line-height:1.35}
+    .cds{padding:2px 16px 0;font-size:.82rem;color:#606060;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .cpsb{padding:12px 16px}.cpsb .bsub{width:100%;padding:10px 0;font-size:.9rem}
+    .cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px}
+    .cs-i{position:relative;cursor:pointer}
+    .cs-i img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;background:#e5e5e5;display:block}
+    .cs-t{font-size:.78rem;font-weight:600;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .cs-v{font-size:.72rem;color:#606060}
+    .cmore{display:block;margin:12px auto}
+    .pfb{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
+    .pfs{position:fixed;left:0;right:0;bottom:0;z-index:401;background:#fff;border-radius:16px 16px 0 0;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1);padding:8px 0 16px}
+    .pfs.open{transform:none}.pfb.open{opacity:1;pointer-events:auto}
+    .pfh{display:flex;align-items:center;gap:14px;padding:14px 20px}
+    .pfh .pav{width:48px;height:48px;font-size:1.3rem}
+    .pfr{display:flex;align-items:center;gap:22px;padding:14px 20px;font-size:.95rem;cursor:pointer}
+    .pfr i{width:22px;text-align:center;font-size:1.1rem;color:#0f0f0f}
+    .pg{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:230;overflow-y:auto}
+    .pg.show{animation:pgIn .22s ease-out}@keyframes pgIn{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
+    .pg-top{position:sticky;top:0;z-index:5;height:52px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 8px;border-bottom:1px solid #e5e5e5;font-weight:600;font-size:1.05rem}
+    .pg-top button{background:none;border:none;font-size:1.2rem;padding:10px 14px}
+    .pgs{display:flex;gap:10px;padding:14px 16px;flex-wrap:wrap}
+    .pgs .bsub{flex:1}
   </style>
 </head>
 <body>
@@ -259,10 +290,8 @@
       <i class="fa-brands fa-youtube"></i><span>YouTube</span>
     </div>
     <div class="hi">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      <i class="fa-regular fa-bell"></i>
       <i class="fa-solid fa-magnifying-glass" onclick="openSrch()"></i>
-      <div class="pav">Ö</div>
+      <div class="pav" onclick="openProfile()">Ö</div>
     </div>
   </header>
 
@@ -289,6 +318,7 @@
     <button class="chip" onclick="selectCat('nefis yemek tarifleri', this)">Yemek Tarifleri</button>
     <button class="chip" onclick="selectCat('karadeniz şarkıları', this)">Karadeniz</button>
     <button class="chip" onclick="selectCat('huzur veren ilahiler', this)">İlahiler</button>
+    <button class="chip" onclick="selectCat('Cimili İbo', this)">Cimili İbo</button>
   </div>
 
   <div id="subBar" class="sab" style="display:none"></div>
@@ -334,17 +364,21 @@
       <button onclick="closeChan()" style="background:none;border:none;font-size:1.2rem"><i class="fa-solid fa-arrow-left"></i></button>
       <span style="font-weight:600" id="cpTt">Kanal</span>
     </div>
-    <div class="ch">
+    <div class="cbn" id="cpBn"></div>
+    <div class="ci">
       <img id="cpAv" src="">
-      <h2 id="cpNm"></h2>
-      <div style="margin:12px 0"><button id="cpSb" class="bsub" onclick="togSub(curCN,curCU,curCA)">Abone Ol</button></div>
+      <div><h2 id="cpNm"></h2><div class="cm" id="cpMt"></div></div>
     </div>
+    <div class="cds" id="cpDs"></div>
+    <div class="cpsb"><button id="cpSb" class="bsub" onclick="togSub(curCN,curCU,curCA)">Abone Ol</button></div>
     <div class="c-tabs">
       <button id="ctV" class="ctab ac" onclick="setChanTab('videos')">Videolar</button>
       <button id="ctS" class="ctab" onclick="setChanTab('shorts')">Shorts</button>
+      <button id="ctL" class="ctab" onclick="setChanTab('live')">Canlı</button>
     </div>
     <div id="cVL" class="feed"></div>
-    <div id="cSL" class="feed" style="display:none"></div>
+    <div id="cSL" style="display:none"></div>
+    <div id="cLL" class="feed" style="display:none"></div>
   </div>
 
   <!-- SHORTS -->
@@ -388,6 +422,16 @@
   </div>
 
   <!-- ALT MENÜ -->
+  <div class="pg" id="pgV"><div class="pg-top"><button onclick="closePage(true)"><i class="fa-solid fa-arrow-left"></i></button><span id="pgT"></span></div><div id="pgB"></div></div>
+  <div class="pfb" id="pfB" onclick="closeProfile()"></div>
+  <div class="pfs" id="pfS">
+    <div class="pfh"><div class="pav">Ö</div><div><div style="font-weight:600" id="pfNm"></div><div class="cm" id="pfHd"></div></div></div>
+    <div class="pfr" onclick="pfGo('mych')"><i class="fa-regular fa-user"></i>Kanalınız</div>
+    <div class="pfr" onclick="pfGo('hist')"><i class="fa-solid fa-clock-rotate-left"></i>İzleme geçmişi</div>
+    <div class="pfr" onclick="pfGo('saved')"><i class="fa-regular fa-bookmark"></i>Videolarınız</div>
+    <div class="pfr" onclick="pfGo('subs')"><i class="fa-brands fa-youtube"></i>Abonelikler</div>
+    <div class="pfr" onclick="pfGo('set')"><i class="fa-solid fa-gear"></i>Ayarlar</div>
+  </div>
   <nav class="bn">
     <button class="nb ac" id="bH" onclick="nav('home')"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
     <button class="nb" id="bS" onclick="nav('shorts')"><i class="fa-solid fa-bolt"></i><span>Shorts</span></button>
@@ -526,6 +570,8 @@
       }
       var wv = gid("wV");
       if(gid("srchW").style.display==="flex") closeSrch();
+      else if(gid("pfS").classList.contains('open')) closeProfile(false);
+      else if(gid("pgV").style.display==="block") closePage(false);
       else if(gid("cV").style.display==="block") closeChan(false);
       else if(wv.style.display==="block" && !wv.classList.contains('mini')) minimizeVideo();
       else if(curNav === 'search' || curNav === 'shorts') nav('home');
@@ -824,6 +870,9 @@
       document.body.classList.remove('in-mini');
       document.body.classList.add('in-watch');
       isWatchPlaying = true;
+      curWatch = {id:id,title:t,uploaderName:ch,uploaderUrl:cu,uploaderAvatar:av};
+      addHist(curWatch);
+      ensureSaveBtn();
       var wf = gid("wIf");
       wf.onload = function(){
         try{ wf.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}), '*'); }catch(e){}
@@ -1205,100 +1254,94 @@
     });
 
     // 3. KANAL (VİDEOLAR VE SHORTS SEKMELERİ - EN YENİDEN ESKİYE)
-    function setChanTab(tab){
-      var bV = gid("ctV"), bS = gid("ctS");
-      var cV = gid("cVL"), cS = gid("cSL");
-      if(tab === 'videos'){
-        bV.classList.add("ac");
-        bS.classList.remove("ac");
-        cV.style.display = "block";
-        cS.style.display = "none";
-      } else {
-        bS.classList.add("ac");
-        bV.classList.remove("ac");
-        cS.style.display = "block";
-        cV.style.display = "none";
-      }
-    }
 
+    var chanReq=0, chanShorts=[], chanNext=null, chanId='', chanData=null;
+    function setChanTab(t){
+      [['videos','ctV','cVL'],['shorts','ctS','cSL'],['live','ctL','cLL']].forEach(function(x){
+        gid(x[1]).classList.toggle('ac',x[0]===t);
+        gid(x[2]).style.display=x[0]===t?'':'none';
+      });
+    }
     async function openChan(n,u,a){
       history.pushState({v:'c'},'');
+      var my=++chanReq;
       curCN=n;curCU=u;curCA=a||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=065fd4&color=fff&size=128`;
-      gid("cpNm").textContent=n;
-      gid("cpTt").textContent=n;
-      gid("cpAv").src=curCA;
-      updSub("cpSb",n);
-      setChanTab('videos');
-      gid("cV").style.display="block";
-      gid("cV").scrollTop=0;
-
-      var vList = gid("cVL");
-      var sList = gid("cSL");
-      vList.innerHTML=`<div class="ld">Kanalın en yeni videoları yükleniyor...</div>`;
-      sList.innerHTML=`<div class="ld">Kanalın Shorts videoları yükleniyor...</div>`;
-
+      gid("cpNm").textContent=n; gid("cpTt").textContent=n; gid("cpAv").src=curCA;
+      gid("cpMt").textContent=''; gid("cpDs").textContent=''; gid("cpBn").style.backgroundImage='none';
+      updSub("cpSb",n); setChanTab('videos');
+      gid("cV").style.display="block"; gid("cV").scrollTop=0;
+      var vL=gid("cVL"), sL2=gid("cSL"), lL=gid("cLL");
+      vL.innerHTML=`<div class="ld">Videolar yükleniyor...</div>`;
+      sL2.innerHTML=`<div class="ld">Shorts yükleniyor...</div>`;
+      lL.innerHTML=`<div class="ld">Canlı yayınlar yükleniyor...</div>`;
       try{
-        var fetchPromises = [
-          apiFetch(`${P}/search?q=${encodeURIComponent(n)}&filter=all`).then(r=>r.json()).catch(()=>({items:[]})),
-          apiFetch(`${P}/search?q=${encodeURIComponent(n + " shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
-        ];
-
-        // Kanalın doğrudan URL'si varsa (/channel/UC... veya /@...) en güncel videoları doğrudan kanal sayfasından çek
-        if(u && (u.includes('/channel/') || u.includes('/c/') || u.includes('/@') || u.includes('/user/'))){
-          fetchPromises.push(
-            apiFetch(`${P}${u}`).then(r=>r.json()).catch(()=>({relatedStreams:[]}))
-          );
+        // Kanal adresi yoksa (arama/Shorts'tan geldiyse) kanalı ada göre bul
+        if(!u || u.indexOf('/channel/')!==0){
+          var rs=await (await apiFetch(`${P}/search?q=${encodeURIComponent(n)}&filter=channels`)).json();
+          var cs=(rs.items||[]).filter(function(i){return i.url&&i.url.indexOf('/channel/')===0});
+          var ex=cs.find(function(i){return (i.name||'').toLowerCase()===n.toLowerCase()})||cs[0];
+          if(ex){u=ex.url;curCU=u;if(!a&&ex.thumbnail){curCA=ex.thumbnail;gid("cpAv").src=curCA}}
         }
+        if(!u) throw new Error('kanal yok');
+        var d=await (await apiFetch(`${P}${u}`)).json();
+        if(my!==chanReq) return;
+        chanData=d; chanId=d.id||''; chanNext=d.nextpage||null;
+        if(d.avatarUrl){curCA=d.avatarUrl;gid("cpAv").src=curCA}
+        if(d.bannerUrl) gid("cpBn").style.backgroundImage=`url("${d.bannerUrl}")`;
+        gid("cpNm").textContent=d.name||n;
+        gid("cpMt").textContent=(d.subscriberCount>0?fmtV(d.subscriberCount)+' abone':'')+(d.verified?' • Onaylı':'');
+        gid("cpDs").textContent=d.description||'';
+        var fill=function(i){i.uploaderName=i.uploaderName||d.name||n;i.uploaderUrl=i.uploaderUrl||u;i.uploaderAvatar=i.uploaderAvatar||curCA;return i};
+        var vids=(d.relatedStreams||[]).filter(function(i){return i.type==='stream'}).map(fill);
+        if(vids.length){ renderFeed(vL,vids,false); chanMoreBtn(); }
+        else vL.innerHTML=`<div class="ld">Bu kanalda video bulunamadı.</div>`;
 
-        var results = await Promise.all(fetchPromises);
-        var rVideos = results[0];
-        var rShorts = results[1];
-        var rDirect = results[2] || { relatedStreams: [] };
-
-        var allItems = (rVideos.items||[]).filter(i=>i.type==='stream');
-        if(rDirect.relatedStreams && rDirect.relatedStreams.length > 0){
-          allItems = allItems.concat(rDirect.relatedStreams);
-        }
-
-        // Tekilleştir (Video ID'sine göre)
-        var seenIds = new Set();
-        var uniqueItems = [];
-        allItems.forEach(item => {
-          var id = vid(item.url);
-          if(id && !seenIds.has(id)){
-            seenIds.add(id);
-            uniqueItems.push(item);
-          }
-        });
-
-        var chItems = uniqueItems.filter(i => 
-          (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
-          (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
-        );
-        if(chItems.length < 3) chItems = uniqueItems;
-        sortNewest(chItems);
-        renderFeed(vList, chItems, false);
-
-        // Shorts videoları
-        var allShorts = (rShorts.items||[]).filter(i=>i.type==='stream' && (i.duration<=180 || (i.title||'').toLowerCase().includes('short')));
-        var chShorts = allShorts.filter(i => 
-          (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
-          (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
-        );
-        if(chShorts.length === 0){
-          chShorts = chItems.filter(i => i.duration > 0 && i.duration <= 180);
-        }
-        sortNewest(chShorts);
-
-        sList.innerHTML = "";
-        if(chShorts.length === 0){
-          sList.innerHTML = `<div class="ld">Bu kanalda Shorts videosu bulunamadı.</div>`;
-        } else {
-          chShorts.forEach(item => appendCard(sList, item, true));
-        }
+        var tabs=d.tabs||[];
+        var getTab=async function(name){
+          var t=tabs.find(function(x){return (x.name||'').toLowerCase()===name});
+          if(!t||!t.data) return null;
+          try{var r=await (await apiFetch(`${P}/channels/tabs?data=${encodeURIComponent(t.data)}`)).json();
+              return (r.content||[]).filter(function(i){return i.url&&i.url.indexOf('v=')>-1}).map(fill);}catch(e){return null}
+        };
+        var res=await Promise.all([getTab('shorts'),getTab('livestreams')]);
+        if(my!==chanReq) return;
+        var sh=res[0];
+        if(!sh||!sh.length) sh=vids.filter(function(i){return i.duration>0&&i.duration<=180});
+        chanShorts=sh;
+        if(!sh.length) sL2.innerHTML=`<div class="ld">Bu kanalda Shorts videosu bulunamadı.</div>`;
+        else sL2.innerHTML='<div class="cs-grid">'+sh.map(function(i,k){
+          return `<div class="cs-i" onclick="openChanShorts(${k})"><img src="${i.thumbnail||''}" loading="lazy"><div class="cs-t">${escHtml(i.title)}</div><div class="cs-v">${i.views>0?fmtV(i.views)+' görüntüleme':''}</div></div>`}).join('')+'</div>';
+        var lv=res[1];
+        if(lv&&lv.length) renderFeed(lL,lv,false); else lL.innerHTML=`<div class="ld">Bu kanalda canlı yayın bulunamadı.</div>`;
       }catch(e){
-        vList.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`;
+        if(my!==chanReq) return;
+        vL.innerHTML=`<div class="ld">Kanal yüklenemedi. Tekrar deneyin.</div>`;
+        sL2.innerHTML=''; lL.innerHTML='';
       }
+    }
+    function chanMoreBtn(){
+      var old=gid("cMore"); if(old) old.remove();
+      if(!chanNext||!chanId) return;
+      var b=document.createElement('button'); b.id='cMore'; b.className='bsub cmore'; b.textContent='Daha fazla video';
+      b.onclick=chanMore; gid("cVL").appendChild(b);
+    }
+    async function chanMore(){
+      var my=chanReq, b=gid("cMore"); if(b) b.textContent='Yükleniyor...';
+      try{
+        var r=await (await apiFetch(`${P}/nextpage/channel/${chanId}?nextpage=${encodeURIComponent(chanNext)}`)).json();
+        if(my!==chanReq) return;
+        chanNext=r.nextpage||null;
+        if(b) b.remove();
+        (r.relatedStreams||[]).forEach(function(i){
+          i.uploaderName=i.uploaderName||curCN;i.uploaderUrl=i.uploaderUrl||curCU;i.uploaderAvatar=i.uploaderAvatar||curCA;appendCard(gid("cVL"),i,false)});
+        chanMoreBtn();
+      }catch(e){ if(b) b.textContent='Tekrar dene'; }
+    }
+    // Kanal Shorts'larında dikey kaydırma: kanalın tüm Shorts'ları sırayla gelir
+    function openChanShorts(k){
+      sL = chanShorts.slice(); sI = k;
+      curSC = curCN; curSA = curCA; curSU = curCU;
+      closeChan(false); nav('shorts'); dispS();
     }
 
     function openShortItem(id, t, ch, av, cu){
@@ -1756,6 +1799,7 @@
 
     // 7. ALT MENÜ
     function nav(n){
+      gid("pgV").style.display="none";
       curNav=n;
       feedReq++;
       document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
@@ -1874,6 +1918,86 @@
     // Başlangıç: Ana sayfayı aç ve Shorts videolarını arka planda önceden hafızaya al!
     loadHome();
     preloadShorts();
+  
+    // ---- PROFİL MENÜSÜ, İZLEME GEÇMİŞİ, KAYDEDİLENLER, AYARLAR ----
+    var curWatch=null;
+    function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+    function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+    function addHist(v){
+      var h=lsGet('yt_hist').filter(function(x){return x.id!==v.id});
+      h.unshift({id:v.id,title:v.title,uploaderName:v.uploaderName,uploaderUrl:v.uploaderUrl,uploaderAvatar:v.uploaderAvatar});
+      lsSet('yt_hist',h.slice(0,200));
+    }
+    function toItem(x){return {url:'/watch?v='+x.id,title:x.title,uploaderName:x.uploaderName,uploaderUrl:x.uploaderUrl,uploaderAvatar:x.uploaderAvatar,thumbnail:'https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg',type:'stream'}}
+    function isSaved(id){return lsGet('yt_saved').some(function(x){return x.id===id})}
+    function ensureSaveBtn(){
+      var b=gid('wSv');
+      if(!b){
+        var sb=gid('wSb'); if(!sb) return;
+        var wr=document.createElement('span'); wr.style.cssText='display:flex;gap:6px';
+        sb.parentNode.insertBefore(wr,sb); wr.appendChild(sb);
+        b=document.createElement('button'); b.id='wSv'; b.className='bsub sd'; b.onclick=toggleSave; wr.appendChild(b);
+      }
+      b.innerHTML=isSaved(curWatch.id)?'<i class="fa-solid fa-bookmark"></i> Kaydedildi':'<i class="fa-regular fa-bookmark"></i> Kaydet';
+    }
+    function toggleSave(){
+      if(!curWatch) return;
+      var l=lsGet('yt_saved');
+      if(isSaved(curWatch.id)) l=l.filter(function(x){return x.id!==curWatch.id}); else l.unshift(curWatch);
+      lsSet('yt_saved',l); ensureSaveBtn();
+    }
+    function getProf(){try{return JSON.parse(localStorage.getItem('yt_prof')||'{}')}catch(e){return {}}}
+    function initProfile(){
+      var n=getProf().name||'Özel Kanalım';
+      var pv=document.querySelectorAll('.pav'); for(var i=0;i<pv.length;i++) pv[i].textContent=n.charAt(0).toUpperCase();
+      gid('pfNm').textContent=n;
+      gid('pfHd').textContent='@'+n.toLowerCase().replace(/\s+/g,'');
+    }
+    function openProfile(){history.pushState({v:'pf'},'');initProfile();gid('pfS').classList.add('open');gid('pfB').classList.add('open')}
+    function closeProfile(pop){
+      gid('pfS').classList.remove('open');gid('pfB').classList.remove('open');
+      if(pop!==false&&history.state&&history.state.v==='pf') history.back();
+    }
+    function pfGo(w){
+      if(w==='subs'){closeProfile(true);nav('subs');return}
+      closeProfile(false); history.replaceState({v:'p'},''); openPage(w,false);
+    }
+    function closePage(pop){
+      gid('pgV').style.display='none';
+      if(pop!==false&&history.state&&history.state.v==='p') history.back();
+    }
+    function openPage(w,push){
+      if(push!==false) history.pushState({v:'p'},'');
+      var pg=gid('pgV'), b=gid('pgB'); b.innerHTML='';
+      var titles={hist:'İzleme geçmişi',saved:'Videolarınız',mych:'Kanalınız',set:'Ayarlar'};
+      gid('pgT').textContent=titles[w];
+      if(w==='hist'||w==='saved'){
+        var l=lsGet(w==='hist'?'yt_hist':'yt_saved');
+        if(!l.length) b.innerHTML='<div class="ld">'+(w==='hist'?'Henüz izlediğin video yok.':'Kaydedilmiş video yok. Bir videoyu izlerken "Kaydet"e dokun.')+'</div>';
+        else{
+          if(w==='hist') b.innerHTML='<div class="pgs"><button class="bsub sd" onclick="if(confirm(\'İzleme geçmişi silinsin mi?\')){lsSet(\'yt_hist\',[]);openPage(\'hist\',false)}">Geçmişi temizle</button></div>';
+          var f=document.createElement('div'); f.className='feed'; b.appendChild(f);
+          l.forEach(function(x){appendCard(f,toItem(x),false)});
+        }
+      } else if(w==='mych'){
+        var pr=getProf().name||'Özel Kanalım';
+        b.innerHTML='<div class="cbn"></div><div class="ci"><div class="pav" style="width:76px;height:76px;font-size:2rem">'+escHtml(pr.charAt(0).toUpperCase())+'</div><div><h2>'+escHtml(pr)+'</h2><div class="cm">@'+escHtml(pr.toLowerCase().replace(/\s+/g,''))+'<br>'+getSubs().length+' abonelik • '+lsGet('yt_hist').length+' izlenen video</div></div></div>'
+          +'<div class="pgs"><button class="bsub sd" onclick="renameProf()">Adı değiştir</button></div>'
+          +'<div class="pfr" onclick="openPage(\'hist\',false)"><i class="fa-solid fa-clock-rotate-left"></i>İzleme geçmişi ('+lsGet('yt_hist').length+')</div>'
+          +'<div class="pfr" onclick="openPage(\'saved\',false)"><i class="fa-regular fa-bookmark"></i>Videolarınız ('+lsGet('yt_saved').length+')</div>';
+      } else if(w==='set'){
+        b.innerHTML='<div class="pfr" onclick="if(confirm(\'İzleme geçmişi silinsin mi?\')){lsSet(\'yt_hist\',[]);alert(\'Silindi\')}"><i class="fa-solid fa-clock-rotate-left"></i>İzleme geçmişini temizle</div>'
+          +'<div class="pfr" onclick="if(confirm(\'Arama geçmişi silinsin mi?\')){try{Object.keys(localStorage).forEach(function(k){if(/srch|search|yt_q/i.test(k))localStorage.removeItem(k)})}catch(e){}alert(\'Silindi\')}"><i class="fa-solid fa-magnifying-glass"></i>Arama geçmişini temizle</div>'
+          +'<div class="pfr" onclick="if(confirm(\'Kaydedilen videolar silinsin mi?\')){lsSet(\'yt_saved\',[]);alert(\'Silindi\')}"><i class="fa-regular fa-bookmark"></i>Kaydedilenleri temizle</div>'
+          +'<div class="pfr" onclick="renameProf()"><i class="fa-regular fa-user"></i>Profil adını değiştir</div>';
+      }
+      pg.style.display='block'; pg.classList.remove('show'); void pg.offsetWidth; pg.classList.add('show'); pg.scrollTop=0;
+    }
+    function renameProf(){
+      var n=prompt('Profil adı:',getProf().name||'Özel Kanalım');
+      if(n&&n.trim()){try{localStorage.setItem('yt_prof',JSON.stringify({name:n.trim().slice(0,30)}))}catch(e){} initProfile(); openPage('mych',false)}
+    }
+    initProfile();
   </script>
 </body>
 </html>
