@@ -6,6 +6,7 @@
   <title>YouTube</title>
   
   <meta name="theme-color" content="#ffffff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="YouTube">
@@ -77,8 +78,11 @@
 
     /* BUTONLAR VE KÜÇÜK OYNATICI (MINIPLAYER) MODU */
     .w-fs-btn{background:#f2f2f2;border:none;border-radius:16px;padding:5px 12px;font-size:.78rem;font-weight:600;color:#0f0f0f;display:flex;align-items:center;gap:6px;cursor:pointer}
-    .w-drag-bar{position:absolute;top:0;left:0;right:0;height:44px;z-index:210;display:flex;align-items:center;padding:0 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.55),transparent);pointer-events:auto}
-    .w-down-btn{background:none;border:none;color:#fff;font-size:1.25rem;cursor:pointer;padding:6px 8px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));display:flex;align-items:center;justify-content:center}
+    .w-drag-bar{position:absolute;top:0;left:0;right:0;height:44px;z-index:210;display:flex;align-items:center;padding:0 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.55),transparent);pointer-events:none}
+    .p-touch{position:absolute;top:0;left:0;right:0;bottom:22%;z-index:205;background:transparent;touch-action:none}
+    #wV.mini .p-touch,body.in-fs-landscape .p-touch{display:none!important}
+    @media (orientation: landscape){body.in-watch .p-touch{display:none!important}}
+    .w-down-btn{pointer-events:auto;background:none;border:none;color:#fff;font-size:1.25rem;cursor:pointer;padding:6px 8px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));display:flex;align-items:center;justify-content:center}
 
     /* KÜÇÜK OYNATICI (YOUTUBE MINIPLAYER) */
     #wV{transition:transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.22s, width 0.25s, height 0.25s, border-radius 0.25s}
@@ -131,19 +135,21 @@
       display:flex;
       align-items:flex-start;
       justify-content:flex-end;
-      padding:6px;
+      padding:3px;
     }
     .mini-close-btn{
-      background:rgba(0,0,0,0.7);
+      background:rgba(0,0,0,0.75);
       color:#fff;
       border:none;
       border-radius:50%;
-      width:26px;
-      height:26px;
+      width:40px;
+      height:40px;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:.9rem;
+      font-size:1.7rem;
+      line-height:1;
+      touch-action:manipulation;
       cursor:pointer;
       backdrop-filter:blur(4px);
     }
@@ -263,7 +269,7 @@
   <!-- ARAMA EKRANI (SON ARAMALAR VE ÖNERİLER) -->
   <div class="srch-overlay" id="srchW">
     <div class="srch-top">
-      <button onclick="closeSrch()"><i class="fa-solid fa-arrow-left"></i></button>
+      <button onclick="closeSrch(true)"><i class="fa-solid fa-arrow-left"></i></button>
       <input type="search" id="srchI" placeholder="@kanal veya video ara..." inputmode="search" autocomplete="off" oninput="renderSrchHist()" onkeydown="if(event.key==='Enter') doSrch()">
       <button onclick="doSrch()"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
@@ -296,7 +302,8 @@
       <div class="w-drag-bar" id="wDragBar">
         <button class="w-down-btn" onclick="minimizeVideo()" title="Küçült"><i class="fa-solid fa-chevron-down"></i></button>
       </div>
-      <iframe id="wIf" allowfullscreen allow="autoplay"></iframe>
+      <iframe id="wIf" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <div class="p-touch" id="pTouch"></div>
     </div>
     <div class="mini-ctrls" id="miniCtrls">
       <button class="mini-close-btn" onclick="event.stopPropagation();closeW(false)" title="Kapat">&times;</button>
@@ -344,15 +351,15 @@
   <div id="sV" class="sv">
     <div class="sfw" id="sWrapper">
       <img id="sPoster" class="s-poster" src="" alt="">
-      <iframe id="sIf" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe id="sIf" allow="autoplay; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
       <div id="sTouch" class="s-touch-layer"></div>
       <div id="sPlayIcon" class="s-play-icon"></div>
 
       <div class="soi">
         <div class="scl">
-          <img id="sAv" class="sav" src="" onclick="openChan(curSC,'',curSA)">
-          <span id="sCh" class="scn" onclick="openChan(curSC,'',curSA)"></span>
-          <button id="sSb" class="bsub" style="padding:4px 10px;font-size:.75rem" onclick="togSub(curSC,'',curSA)">Abone Ol</button>
+          <img id="sAv" class="sav" src="" onclick="openChan(curSC,curSU,curSA)">
+          <span id="sCh" class="scn" onclick="openChan(curSC,curSU,curSA)"></span>
+          <button id="sSb" class="bsub" style="padding:4px 10px;font-size:.75rem" onclick="togSub(curSC,curSU,curSA)">Abone Ol</button>
         </div>
         <div id="sTt" class="sde"></div>
       </div>
@@ -391,13 +398,26 @@
     // PIPED API - SINIRSIZ ve KOTASIZ
     const P = "https://api.piped.private.coffee";
 
-    // TÜRKÇE KONUM VE DİL DESTEĞİ İLE API ÇAĞRISI (İngilizce Başlıkları Önler)
-    function apiFetch(url){
-      return fetch(url, {
-        headers: {
-          'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.1'
-        }
-      });
+    // Ana sunucu çökerse sırayla yedek sunuculara geçer (kullanılabilir adreslerle değiştirebilirsin)
+    const PIPED_ALL = [P, "https://pipedapi.kavin.rocks", "https://pipedapi.adminforge.de"];
+    let pGood = 0;
+    var HDRS = {'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.1'};
+
+    async function apiFetch(url){
+      if(url.indexOf(P) !== 0) return fetch(url, {headers: HDRS});
+      var path = url.slice(P.length), lastErr = null;
+      for(var n = 0; n < PIPED_ALL.length; n++){
+        var idx = (pGood + n) % PIPED_ALL.length;
+        var ctl = new AbortController();
+        var tm = setTimeout(function(){ ctl.abort(); }, 12000);
+        try{
+          var r = await fetch(PIPED_ALL[idx] + path, {headers: HDRS, signal: ctl.signal});
+          clearTimeout(tm);
+          if(r.ok || r.status === 404){ pGood = idx; return r; }
+          lastErr = new Error('HTTP ' + r.status);
+        }catch(e){ clearTimeout(tm); lastErr = e; }
+      }
+      throw lastErr || new Error('API hatası');
     }
 
     const KW = [
@@ -417,22 +437,24 @@
     ];
 
     const SHORT_KW = [
-      "çiçek bakımı #shorts",
-      "bahçe çiçekleri #shorts",
-      "pasta tarifleri #shorts",
-      "örgü modelleri #shorts",
-      "doğa manzaraları #shorts",
-      "sevimli kediler #shorts",
-      "köy hayatı #shorts",
-      "karadeniz #shorts",
-      "rize #shorts",
-      "nefis yemek tarifleri #shorts",
-      "huzur veren ilahiler #shorts"
+      "çiçek bakımı shorts",
+      "bahçe çiçekleri shorts",
+      "pasta tarifleri shorts",
+      "örgü modelleri shorts",
+      "doğa manzaraları shorts",
+      "sevimli kediler shorts",
+      "köy hayatı shorts",
+      "karadeniz shorts",
+      "rize shorts",
+      "nefis yemek tarifleri shorts",
+      "huzur veren ilahiler shorts"
     ];
 
     let curNav='home', curVC='', curVU='', curVA='';
     let curCN='', curCU='', curCA='';
-    let curSC='', curSA='';
+    let curSC='', curSA='', curSU='';
+    let feedReq = 0, lastFilter = 'videos';
+    let isWatchPlaying = true;
     let sL=[], sI=0;
 
     let nextPageToken = null;
@@ -452,8 +474,10 @@
         return;
       }
 
+      var my = ++feedReq;
+      lastFilter = 'videos';
       var f = gid("vList");
-      f.innerHTML = `<div class="ld">"${cat}" videoları yükleniyor...</div>`;
+      f.innerHTML = `<div class="ld">"${escHtml(cat)}" videoları yükleniyor...</div>`;
       nextPageToken = null;
       lastQuery = cat;
       currentFeedTarget = 'vList';
@@ -461,6 +485,7 @@
       try{
         var r = await apiFetch(`${P}/search?q=${encodeURIComponent(cat)}&filter=videos`);
         var d = await r.json();
+        if(my !== feedReq) return;
         var items = (d.items || []).filter(i => i.type === 'stream');
         nextPageToken = d.nextpage || null;
 
@@ -472,6 +497,7 @@
 
         renderFeed(f, items, false);
       }catch(e){
+        if(my !== feedReq) return;
         f.innerHTML = `<div class="ld">Videolar yüklenemedi. Tekrar deneyin.</div>`;
       }
     }
@@ -498,16 +524,12 @@
         toggleFullScreenLandscape();
         return;
       }
-      if(gid("cV").style.display==="block") closeChan(false);
-      else if(gid("wV").style.display==="block"){
-        if(!gid("wV").classList.contains('mini')){
-          minimizeVideo();
-        } else {
-          closeW(false);
-        }
-      }
-      else if(curNav === 'shorts') nav('home');
-      else if(gid("srchW").style.display==="flex") closeSrch();
+      var wv = gid("wV");
+      if(gid("srchW").style.display==="flex") closeSrch();
+      else if(gid("cV").style.display==="block") closeChan(false);
+      else if(wv.style.display==="block" && !wv.classList.contains('mini')) minimizeVideo();
+      else if(curNav === 'search' || curNav === 'shorts') nav('home');
+      else if(wv.style.display==="block" && wv.classList.contains('mini')) closeW(false);
     });
 
     // SONSUZ KAYDIRMA - Sayfa dibine gelince yeni video yükle
@@ -520,12 +542,13 @@
     });
 
     function gid(id){return document.getElementById(id)}
-    function getSubs(){return JSON.parse(localStorage.getItem('yt_s3')||'[]')}
+    function getSubs(){try{return JSON.parse(localStorage.getItem('yt_s3')||'[]')}catch(e){return []}}
     function saveSubs(s){localStorage.setItem('yt_s3',JSON.stringify(s))}
     function vid(u){if(!u)return'';if(u.includes('v='))return u.split('v=')[1].split('&')[0];return u.replace('/watch?v=','')}
-    function esc(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+    function esc(s){return(s||'').replace(/[\r\n]+/g,' ').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+    function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
     function fmtD(s){if(!s||s<0)return'';var m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc}
-    function fmtV(v){if(!v||v<0)return'';if(v>=1e6)return Math.floor(v/1e6)+'M';if(v>=1e3)return Math.floor(v/1e3)+'B';return v+''}
+    function fmtV(v){if(!v||v<0)return'';var f=function(x){return (Math.floor(x*10)/10).toString().replace('.',',')};if(v>=1e9)return f(v/1e9)+' Mr';if(v>=1e6)return f(v/1e6)+' Mn';if(v>=1e3)return f(v/1e3)+' B';return v+''}
 
     // EN YENİDEN ESKİYE DOĞRU SIRALAMA FONKSİYONU
     function sortNewest(videos){
@@ -538,6 +561,8 @@
 
     // 1. ANA SAYFA: Abone olunan kanallardan yeni yüklenen videolar en başta, ardından kategoriler harmanlanır
     async function loadHome(){
+      var my=++feedReq;
+      lastFilter='videos';
       var f=gid("vList");
       f.innerHTML=`<div class="ld">Videolar yükleniyor...</div>`;
       nextPageToken=null;
@@ -585,6 +610,7 @@
           Promise.all(subPromises),
           Promise.all(kwPromises)
         ]);
+        if(my !== feedReq) return;
 
         var subVideos = [];
         var subSeen = new Set();
@@ -606,7 +632,7 @@
           .concat((kwResults[1].items||[]).filter(i=>i.type==='stream'));
         kwVideos.sort(() => 0.5 - Math.random());
 
-        nextPageToken = kwResults[0].nextpage || kwResults[1].nextpage || null;
+        nextPageToken = kwResults[0].nextpage || null;
 
         var mixedFeed = [];
         var seenIds = new Set();
@@ -653,6 +679,7 @@
 
         renderFeed(f, mixedFeed, false);
       }catch(e){
+        if(my !== feedReq) return;
         f.innerHTML=`<div class="ld">Bağlantı hatası. Tekrar deneyin.</div>`;
       }
     }
@@ -670,7 +697,7 @@
       f.appendChild(ldDiv);
 
       try{
-        var r=await apiFetch(`${P}/nextpage/search?q=${encodeURIComponent(lastQuery)}&filter=videos&nextpage=${encodeURIComponent(nextPageToken)}`);
+        var r=await apiFetch(`${P}/nextpage/search?q=${encodeURIComponent(lastQuery)}&filter=${lastFilter}&nextpage=${encodeURIComponent(nextPageToken)}`);
         var d=await r.json();
         var items=(d.items||[]).filter(i=>i.type==='stream');
         nextPageToken=d.nextpage||null;
@@ -766,7 +793,7 @@
       var ud=trDate(item.uploadedDate, item.uploaded);
 
       var clickAct = isShortItem ? 
-        `openShortItem('${id}','${esc(t)}','${esc(ch)}','${av}')` :
+        `openShortItem('${id}','${esc(t)}','${esc(ch)}','${av}','${cu}')` :
         `openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}','${vw}','${esc(ud)}')`;
 
       var card=document.createElement("div");
@@ -779,8 +806,8 @@
         <div class="vd">
           <img class="ca" src="${av}" onclick="event.stopPropagation();openChan('${esc(ch)}','${cu}','${av}')">
           <div class="mc" onclick="${clickAct}">
-            <div class="vt">${t}</div>
-            <div class="vs">${ch}${vw?' • '+vw+' görüntüleme':''}${ud?' • '+ud:''}</div>
+            <div class="vt">${escHtml(t)}</div>
+            <div class="vs">${escHtml(ch)}${vw?' • '+vw+' görüntüleme':''}${ud?' • '+ud:''}</div>
           </div>
         </div>`;
       c.appendChild(card);
@@ -796,7 +823,12 @@
       w.style.opacity = '';
       document.body.classList.remove('in-mini');
       document.body.classList.add('in-watch');
-      gid("wIf").src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+      isWatchPlaying = true;
+      var wf = gid("wIf");
+      wf.onload = function(){
+        try{ wf.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}), '*'); }catch(e){}
+      };
+      wf.src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`;
       gid("wTt").textContent=t;
       gid("wCh").textContent=ch;
       gid("wAv").src=av;
@@ -877,10 +909,29 @@
       document.body.classList.add('in-watch');
     }
 
+    function toggleWatchPlay(){
+      var f = gid("wIf");
+      if(!f || !f.contentWindow) return;
+      f.contentWindow.postMessage(JSON.stringify({event:'command', func: isWatchPlaying ? 'pauseVideo' : 'playVideo', args:''}), '*');
+      isWatchPlaying = !isWatchPlaying;
+    }
+    window.addEventListener('message', function(e){
+      var f = gid("wIf");
+      if(!f || e.source !== f.contentWindow) return;
+      var d = e.data;
+      if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch(x){ return; } }
+      if(!d) return;
+      var st = null;
+      if(d.event === 'onStateChange') st = d.info;
+      else if(d.event === 'infoDelivery' && d.info && typeof d.info.playerState === 'number') st = d.info.playerState;
+      if(st === 1) isWatchPlaying = true;
+      else if(st === 2) isWatchPlaying = false;
+    });
+
     // DOKUNMATİK JESTLER: Basılı tutup aşağı kaydırarak küçültme & Yukarı kaydırarak kapatma
     (function setupVideoMiniGestures(){
       var wV = gid("wV");
-      var pWrap = gid("playerWrap");
+      var pWrap = gid("pTouch");
       var miniCtrls = gid("miniCtrls");
 
       var startY = 0, startX = 0, diffY = 0, diffX = 0;
@@ -888,37 +939,28 @@
       var isHeld = false;
       var isMiniDraggingUp = false;
 
-      // 1. VİDEONUN ÜZERİNDE BASILI TUTUP AŞAĞI KAYDIRINCA KÜÇÜK OYNATICIYA DÖNÜŞTÜR
+      // 1. VİDEONUN ÜZERİNDE (şeffaf katman) basılı tutup/kaydırıp aşağı çekince küçült, kısa dokunuşta oynat/duraklat
+      var wStartT = 0, wDragging = false, wMoved = false;
+
       function onWatchTouchStart(e){
         if(wV.classList.contains('mini') || e.touches.length !== 1) return;
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
-        diffY = 0;
-        diffX = 0;
-        isHeld = false;
-        clearTimeout(holdTimer);
-        // Basılı tutma süresi: 250ms (kazaen küçülmeyi tamamen engeller)
-        holdTimer = setTimeout(function(){
-          isHeld = true;
-          wV.style.transition = 'none';
-        }, 250);
+        diffY = 0; diffX = 0;
+        wStartT = Date.now();
+        wDragging = true; wMoved = false;
       }
 
       function onWatchTouchMove(e){
-        if(wV.classList.contains('mini') || e.touches.length !== 1) return;
+        if(!wDragging || e.touches.length !== 1) return;
         diffY = e.touches[0].clientY - startY;
         diffX = e.touches[0].clientX - startX;
-
-        // Eğer 250ms basılı tutulmadan parmak kaydırıldıysa basılı tutmayı iptal et
-        if(!isHeld){
-          if(Math.abs(diffY) > 8 || Math.abs(diffX) > 8){
-            clearTimeout(holdTimer);
-          }
-          return;
+        if(!wMoved){
+          if(Math.abs(diffY) > 8 || Math.abs(diffX) > 8) wMoved = true;
+          else return;
         }
-
-        // Basılı tutulduysa ve aşağı doğru çekiliyorsa
-        if(isHeld && diffY > 10 && diffY > Math.abs(diffX)){
+        if(diffY > 0 && diffY > Math.abs(diffX)){
+          wV.style.transition = 'none';
           var clamped = Math.min(diffY, 180);
           wV.style.transform = `translate3d(0, ${clamped}px, 0)`;
           wV.style.opacity = Math.max(0.65, 1 - (diffY / 450));
@@ -926,22 +968,27 @@
       }
 
       function onWatchTouchEnd(e){
-        clearTimeout(holdTimer);
-        if(!isHeld) return;
-        isHeld = false;
+        if(!wDragging) return;
+        wDragging = false;
         wV.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.22s';
-
-        // Basılı tutulup 40 pikselden fazla aşağı kaydırıldıysa küçült
-        if(diffY > 40 && diffY > Math.abs(diffX)){
+        if(wMoved && diffY > 40 && diffY > Math.abs(diffX)){
           minimizeVideo();
         } else {
           wV.style.transform = '';
           wV.style.opacity = '';
+          if(!wMoved && (Date.now() - wStartT) < 400) toggleWatchPlay();
         }
+      }
+
+      function onWatchTouchCancel(){
+        wDragging = false;
+        wV.style.transform = '';
+        wV.style.opacity = '';
       }
 
       // 2. KÜÇÜK OYNATICIYI YUKARI KAYDIRARAK KAPATMA
       function onMiniTouchStart(e){
+        if(e.target && e.target.closest && e.target.closest('.mini-close-btn')) return;
         if(!wV.classList.contains('mini') || e.touches.length !== 1) return;
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
@@ -964,6 +1011,7 @@
       }
 
       function onMiniTouchEnd(e){
+        if(e.target && e.target.closest && e.target.closest('.mini-close-btn')) { isMiniDraggingUp = false; return; }
         if(!isMiniDraggingUp) return;
         isMiniDraggingUp = false;
 
@@ -990,6 +1038,7 @@
       pWrap.addEventListener('touchstart', onWatchTouchStart, { passive: true });
       pWrap.addEventListener('touchmove', onWatchTouchMove, { passive: true });
       pWrap.addEventListener('touchend', onWatchTouchEnd);
+      pWrap.addEventListener('touchcancel', onWatchTouchCancel);
 
       if(miniCtrls){
         miniCtrls.addEventListener('touchstart', onMiniTouchStart, { passive: true });
@@ -1191,7 +1240,7 @@
       try{
         var fetchPromises = [
           apiFetch(`${P}/search?q=${encodeURIComponent(n)}&filter=all`).then(r=>r.json()).catch(()=>({items:[]})),
-          apiFetch(`${P}/search?q=${encodeURIComponent(n + " #shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
+          apiFetch(`${P}/search?q=${encodeURIComponent(n + " shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
         ];
 
         // Kanalın doğrudan URL'si varsa (/channel/UC... veya /@...) en güncel videoları doğrudan kanal sayfasından çek
@@ -1252,10 +1301,10 @@
       }
     }
 
-    function openShortItem(id, t, ch, av){
+    function openShortItem(id, t, ch, av, cu){
       curSC = ch;
       curSA = av;
-      sL = [{ url: '/watch?v=' + id, title: t, uploaderName: ch, uploaderAvatar: av }];
+      sL = [{ url: '/watch?v=' + id, title: t, uploaderName: ch, uploaderAvatar: av, uploaderUrl: cu || '' }];
       sI = 0;
       closeChan(false);
       nav('shorts');
@@ -1286,7 +1335,7 @@
       s.forEach(x=>{
         var d=document.createElement("div");d.className="sai";
         d.onclick=()=>openChan(x.name,x.url,x.avatar);
-        d.innerHTML=`<img src="${x.avatar}"><span>${x.name}</span>`;
+        d.innerHTML=`<img src="${x.avatar}"><span>${escHtml(x.name)}</span>`;
         b.appendChild(d);
       });
     }
@@ -1335,7 +1384,7 @@
             row.innerHTML = `
               <div class="sh-left">
                 <i class="fa-solid fa-clock-rotate-left"></i>
-                <span>${esc(q)}</span>
+                <span>${escHtml(q)}</span>
               </div>
               <button class="sh-del" onclick="removeSearchQuery('${esc(q)}', event)">&times;</button>
             `;
@@ -1358,7 +1407,7 @@
         row.innerHTML = `
           <div class="sh-left">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <span>${esc(q)}</span>
+            <span>${escHtml(q)}</span>
           </div>
         `;
         box.appendChild(row);
@@ -1366,6 +1415,7 @@
     }
 
     function openSrch(){
+      history.pushState({v:'s'},'');
       var w = gid("srchW");
       var inp = gid("srchI");
       w.style.display = "flex";
@@ -1375,11 +1425,13 @@
         inp.select();
       }, 50);
     }
-    function closeSrch(){gid("srchW").style.display="none"}
+    function closeSrch(pop){gid("srchW").style.display="none"; if(pop===true && history.state && history.state.v==='s') history.back();}
     async function doSrch(customQ){
       var q = (customQ || gid("srchI").value).trim();
       if(!q) return;
       saveSearchQuery(q);
+      var my = ++feedReq;
+      lastFilter = 'all';
       closeSrch();
       stopS();
       gid("sV").style.display="none";
@@ -1392,7 +1444,7 @@
       gid("subBar").style.display="none";
       document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
       var f=gid("vList");
-      f.innerHTML=`<div class="ld">"${q}" aranıyor...</div>`;
+      f.innerHTML=`<div class="ld">"${escHtml(q)}" aranıyor...</div>`;
       curNav='search';
       nextPageToken=null;
       lastQuery=q;
@@ -1401,6 +1453,7 @@
       try{
         var r=await apiFetch(`${P}/search?q=${encodeURIComponent(q)}&filter=all`);
         var d=await r.json();
+        if(my !== feedReq) return;
         f.innerHTML="";
         if(!d.items||!d.items.length){f.innerHTML=`<div class="ld">Sonuç bulunamadı.</div>`;return}
 
@@ -1409,7 +1462,7 @@
           cd.innerHTML=`
             <div class="sci" onclick="openChan('${esc(c.name)}','${c.url}','${c.thumbnail}')">
               <img src="${c.thumbnail}">
-              <div><div style="font-weight:600;font-size:1.05rem">${c.name}</div>
+              <div><div style="font-weight:600;font-size:1.05rem">${escHtml(c.name)}</div>
               <div style="font-size:.8rem;color:#606060">${c.subscribers?c.subscribers+' abone • ':''}YouTube Kanalı</div></div>
             </div>
             <button class="bsub" onclick="togSub('${esc(c.name)}','${c.url}','${c.thumbnail}')">Abone Ol</button>`;
@@ -1419,7 +1472,7 @@
         var streams=d.items.filter(i=>i.type==='stream');
         nextPageToken=d.nextpage||null;
         streams.forEach(item=>appendCard(f,item));
-      }catch(e){f.innerHTML=`<div class="ld">Arama yapılamadı.</div>`}
+      }catch(e){ if(my !== feedReq) return; f.innerHTML=`<div class="ld">Arama yapılamadı.</div>`}
     }
 
     // 6. SHORTS (ÖN YÜKLEME + FARKLI KANALLAR + ANINDA HIZLI AÇILIŞ)
@@ -1428,39 +1481,53 @@
     let preloadedShorts = [];
     let isPreloadingShorts = false;
 
+    // Boş gelen ilk sayfada (Shorts rafı) sıradaki sayfayı otomatik çeker
+    async function searchItems(q, filter){
+      filter = filter || 'videos';
+      try{
+        var r = await apiFetch(`${P}/search?q=${encodeURIComponent(q)}&filter=${filter}`);
+        var d = await r.json();
+        var items = d.items || [];
+        if(!items.length && d.nextpage){
+          var r2 = await apiFetch(`${P}/nextpage/search?q=${encodeURIComponent(q)}&filter=${filter}&nextpage=${encodeURIComponent(d.nextpage)}`);
+          var d2 = await r2.json();
+          items = d2.items || [];
+        }
+        return items;
+      }catch(e){ return []; }
+    }
+
     async function preloadShorts(){
       if(isPreloadingShorts) return;
       isPreloadingShorts = true;
 
-      var shuffled = [...SHORT_KW].sort(() => 0.5 - Math.random());
-      var k1 = shuffled[0] || "yemek tarifleri #shorts";
-      var k2 = shuffled[1] || "karadeniz #shorts";
-      var k3 = shuffled[2] || "çiçek bakımı #shorts";
-
       try {
-        var [r1, r2, r3] = await Promise.all([
-          apiFetch(`${P}/search?q=${encodeURIComponent(k1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          apiFetch(`${P}/search?q=${encodeURIComponent(k2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          apiFetch(`${P}/search?q=${encodeURIComponent(k3)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
-        ]);
-
-        var all = []
-          .concat((r1.items||[]).filter(i=>i.type==='stream'&&i.duration>0&&i.duration<=120))
-          .concat((r2.items||[]).filter(i=>i.type==='stream'&&i.duration>0&&i.duration<=120))
-          .concat((r3.items||[]).filter(i=>i.type==='stream'&&i.duration>0&&i.duration<=120));
-
-        all.sort(() => 0.5 - Math.random());
-
-        // 2. MADDE: AYNI KANALDAN SADECE 1 VİDEO AL (Farklı kanallar gelsin)
-        var seenCh = new Set();
         var diverse = [];
-        all.forEach(item => {
-          var ch = item.uploaderName || '';
-          if(!seenCh.has(ch)){
-            seenCh.add(ch);
-            diverse.push(item);
-          }
-        });
+        for(var attempt = 0; attempt < 2 && diverse.length === 0; attempt++){
+          var shuffled = [...SHORT_KW].sort(() => 0.5 - Math.random());
+          var res = await Promise.all([
+            searchItems(shuffled[0] || "yemek tarifleri shorts"),
+            searchItems(shuffled[1] || "karadeniz shorts"),
+            searchItems(shuffled[2] || "çiçek bakımı shorts")
+          ]);
+
+          var all = [];
+          res.forEach(arr => {
+            arr.forEach(i => { if(i.type==='stream' && i.duration>0 && i.duration<=180) all.push(i); });
+          });
+
+          // Piped'ın isShort alanı varsa önce gerçek Shorts'ları kullan
+          var real = all.filter(i => i.isShort);
+          if(real.length >= 4) all = real;
+          all.sort(() => 0.5 - Math.random());
+
+          // Aynı kanaldan sadece 1 video
+          var seenCh = new Set();
+          all.forEach(item => {
+            var ch = item.uploaderName || '';
+            if(!seenCh.has(ch)){ seenCh.add(ch); diverse.push(item); }
+          });
+        }
 
         if(diverse.length > 0){
           if(sL.length === 0){
@@ -1510,6 +1577,7 @@
       if(!sL.length) return;
       var it = sL[sI], id = vid(it.url);
       curSC = it.uploaderName || '';
+      curSU = it.uploaderUrl || '';
       curSA = it.uploaderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(curSC)}`;
 
       var poster = gid("sPoster");
@@ -1689,6 +1757,7 @@
     // 7. ALT MENÜ
     function nav(n){
       curNav=n;
+      feedReq++;
       document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
       if(!document.body.classList.contains('in-mini')){
         gid("wV").style.display="none";
@@ -1725,6 +1794,7 @@
 
     // ABONELİKLER: ABONE OLUNAN KANALLARIN EN YENİ VİDEOLARI (EN YENİDEN ESKİYE)
     async function loadSubF(){
+      var my=++feedReq;
       var f=gid("vList"), s=getSubs();
       if(!s.length){
         f.innerHTML=`<div class="ld">Henüz abone olduğunuz kanal yok.<br>Üstteki büyütece <b>@okankarali</b> yazarak abone olabilirsiniz.</div>`;
@@ -1755,6 +1825,7 @@
         });
 
         var results = await Promise.all(promises);
+        if(my !== feedReq) return;
         var allSubVideos = [];
         var seenIds = new Set();
 
