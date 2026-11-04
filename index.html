@@ -445,17 +445,17 @@
     // Ana sunucu çökerse sırayla yedek sunuculara geçer (kullanılabilir adreslerle değiştirebilirsin)
     const PIPED_ALL = [P, "https://pipedapi.kavin.rocks", "https://pipedapi.adminforge.de"];
     let pGood = 0;
-    var HDRS = {'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.1'};
+    var HDRS = {'Accept-Language': 'tr-TR,tr;q=0.9'};
 
     async function apiFetch(url){
-      if(url.indexOf(P) !== 0) return fetch(url, {headers: HDRS});
+      if(url.indexOf(P) !== 0) return fetch(url, {headers: HDRS, cache: 'no-store'});
       var path = url.slice(P.length), lastErr = null;
       for(var n = 0; n < PIPED_ALL.length; n++){
         var idx = (pGood + n) % PIPED_ALL.length;
         var ctl = new AbortController();
         var tm = setTimeout(function(){ ctl.abort(); }, 12000);
         try{
-          var r = await fetch(PIPED_ALL[idx] + path, {headers: HDRS, signal: ctl.signal});
+          var r = await fetch(PIPED_ALL[idx] + path, {headers: HDRS, signal: ctl.signal, cache: 'no-store'});
           clearTimeout(tm);
           if(r.ok || r.status === 404){ pGood = idx; return r; }
           lastErr = new Error('HTTP ' + r.status);
@@ -597,12 +597,36 @@
     function fmtV(v){if(!v||v<0)return'';var f=function(x){return (Math.floor(x*10)/10).toString().replace('.',',')};if(v>=1e9)return f(v/1e9)+' Mr';if(v>=1e6)return f(v/1e6)+' Mn';if(v>=1e3)return f(v/1e3)+' B';return v+''}
 
     // EN YENİDEN ESKİYE DOĞRU SIRALAMA FONKSİYONU
+    function relTs(str){
+      if(!str) return 0;
+      var m=String(str).toLowerCase().match(/(\d+)\s*(saniye|dakika|saat|gün|hafta|ay|yıl|second|minute|hour|day|week|month|year)/);
+      if(!m) return 0;
+      var u=m[2], n=parseInt(m[1],10), sec={saniye:1,second:1,dakika:60,minute:60,saat:3600,hour:3600,'gün':86400,day:86400,hafta:604800,week:604800,ay:2592000,month:2592000,'yıl':31536000,year:31536000}[u]||0;
+      return Date.now()-n*sec*1000;
+    }
+    function tsOf(v){return v.uploaded>0?v.uploaded:relTs(v.uploadedDate)}
     function sortNewest(videos){
       return videos.sort((a, b) => {
         if(a.duration === -1 && b.duration !== -1) return -1;
         if(b.duration === -1 && a.duration !== -1) return 1;
-        return (b.uploaded || 0) - (a.uploaded || 0);
+        return tsOf(b) - tsOf(a);
       });
+    }
+    // Bir kanalın en yeni videoları: ana yanıt boşsa "videos" sekmesinden çeker
+    async function chanLatest(url){
+      try{
+        var d=await (await apiFetch(`${P}${url}`)).json();
+        var list=(d.relatedStreams||[]).filter(function(i){return i.type==='stream'});
+        if(!list.length){
+          var t=(d.tabs||[]).find(function(x){return (x.name||'').toLowerCase()==='videos'});
+          if(t&&t.data){
+            var r=await (await apiFetch(`${P}/channels/tabs?data=${encodeURIComponent(t.data)}`)).json();
+            list=(r.content||[]).filter(function(i){return i.url&&i.url.indexOf('v=')>-1});
+          }
+        }
+        list.forEach(function(i){i.uploaderName=i.uploaderName||d.name||'';i.uploaderUrl=i.uploaderUrl||url;i.uploaderAvatar=i.uploaderAvatar||d.avatarUrl||''});
+        return list.slice(0,15);
+      }catch(e){return []}
     }
 
     // 1. ANA SAYFA: Abone olunan kanallardan yeni yüklenen videolar en başta, ardından kategoriler harmanlanır
@@ -619,9 +643,9 @@
 
       // Abone olunan TÜM kanallardan en yeni videoları çek (hem doğrudan kanal sayfasından hem aramadan)
       if(s.length > 0){
-        s.slice(0, 12).forEach(sub => {
+        s.slice(0, 15).forEach(sub => {
           var pDirect = (sub.url && (sub.url.includes('/channel/') || sub.url.includes('/@'))) ?
-            apiFetch(`${P}${sub.url}`).then(r => r.json()).then(d => d.relatedStreams || []).catch(() => []) :
+            chanLatest(sub.url) :
             Promise.resolve([]);
 
           var pSearch = apiFetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=all`)
@@ -1312,6 +1336,7 @@
           }catch(e){}
         }
         if(my!==chanReq) return;
+        sortNewest(vids);
         if(vids.length){ renderFeed(vL,vids,false); chanMoreBtn(); }
         else vL.innerHTML=`<div class="ld">Bu kanalda video bulunamadı.</div>`;
 
@@ -1319,12 +1344,13 @@
         if(my!==chanReq) return;
         var sh=res[0];
         if(!sh||!sh.length) sh=vids.filter(function(i){return i.duration>0&&i.duration<=180});
+        sortNewest(sh);
         chanShorts=sh;
         if(!sh.length) sL2.innerHTML=`<div class="ld">Bu kanalda Shorts videosu bulunamadı.</div>`;
         else sL2.innerHTML='<div class="cs-grid">'+sh.map(function(i,k){
           return `<div class="cs-i" onclick="openChanShorts(${k})"><img src="${i.thumbnail||''}" loading="lazy"><div class="cs-t">${escHtml(i.title)}</div><div class="cs-v">${i.views>0?fmtV(i.views)+' görüntüleme':''}</div></div>`}).join('')+'</div>';
         var lv=res[1];
-        if(lv&&lv.length) renderFeed(lL,lv,false); else lL.innerHTML=`<div class="ld">Bu kanalda canlı yayın bulunamadı.</div>`;
+        if(lv&&lv.length){ sortNewest(lv); renderFeed(lL,lv,false); } else lL.innerHTML=`<div class="ld">Bu kanalda canlı yayın bulunamadı.</div>`;
       }catch(e){
         if(my!==chanReq) return;
         vL.innerHTML=`<div class="ld">Kanal yüklenemedi. Tekrar deneyin.</div>`;
@@ -1859,10 +1885,10 @@
       f.innerHTML=`<div class="ld">Abone olduğunuz kanalların en yeni videoları yükleniyor...</div>`;
 
       try{
-        var targets = s.slice(0, 12);
+        var targets = s.slice(0, 15);
         var promises = targets.map(ch => {
           var pDirect = (ch.url && (ch.url.includes('/channel/') || ch.url.includes('/@'))) ?
-            apiFetch(`${P}${ch.url}`).then(r => r.json()).then(d => d.relatedStreams || []).catch(() => []) :
+            chanLatest(ch.url) :
             Promise.resolve([]);
 
           var pSearch = apiFetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=all`)
