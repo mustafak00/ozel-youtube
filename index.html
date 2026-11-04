@@ -324,51 +324,98 @@
     function fmtD(s){if(!s||s<0)return'';var m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc}
     function fmtV(v){if(!v||v<0)return'';if(v>=1e6)return Math.floor(v/1e6)+'M';if(v>=1e3)return Math.floor(v/1e3)+'B';return v+''}
 
-    // 2. MADDE: ANA SAYFA - BİRBİRİNDEN FARKLI KONU VE KANALLARDAN KARIŞIK VİDEOLAR GETİRİR
+    // EN YENİDEN ESKİYE DOĞRU SIRALAMA FONKSİYONU
+    function sortNewest(videos){
+      return videos.sort((a, b) => {
+        if(a.duration === -1 && b.duration !== -1) return -1;
+        if(b.duration === -1 && a.duration !== -1) return 1;
+        return (b.uploaded || 0) - (a.uploaded || 0);
+      });
+    }
+
+    // 1. ANA SAYFA: Abone olunan kanalların en son videoları + benzer/kategori videoları harmanlanır
     async function loadHome(){
       var f=gid("vList");
       f.innerHTML=`<div class="ld">Videolar yükleniyor...</div>`;
       nextPageToken=null;
       currentFeedTarget='vList';
 
-      // 3 farklı izin verilen konudan rastgele seçip aynı anda çekiyoruz
+      var s = getSubs();
+      var subPromises = [];
+
+      // Abone olunan kanallardan en son videoları çek
+      if(s.length > 0){
+        var targets = [...s].sort(() => 0.5 - Math.random()).slice(0, 4);
+        targets.forEach(sub => {
+          subPromises.push(
+            fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=videos`)
+              .then(r => r.json())
+              .then(d => (d.items || []).filter(i => i.type === 'stream').slice(0, 3))
+              .catch(() => [])
+          );
+        });
+      }
+
+      // İzin verilen / benzer konulardan da video çek
       var shuffledKW = [...KW].sort(() => 0.5 - Math.random());
       var q1 = shuffledKW[0];
       var q2 = shuffledKW[1];
-      var q3 = shuffledKW[2];
       lastQuery = q1;
 
+      var kwPromises = [
+        fetch(`${P}/search?q=${encodeURIComponent(q1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
+        fetch(`${P}/search?q=${encodeURIComponent(q2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
+      ];
+
       try{
-        var [res1, res2, res3] = await Promise.all([
-          fetch(`${P}/search?q=${encodeURIComponent(q1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(q2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(q3)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
+        var [subResults, kwResults] = await Promise.all([
+          Promise.all(subPromises),
+          Promise.all(kwPromises)
         ]);
 
-        var allItems = []
-          .concat((res1.items||[]).filter(i=>i.type==='stream'))
-          .concat((res2.items||[]).filter(i=>i.type==='stream'))
-          .concat((res3.items||[]).filter(i=>i.type==='stream'));
+        var subVideos = [];
+        subResults.forEach(arr => { subVideos = subVideos.concat(arr); });
+        sortNewest(subVideos);
 
-        nextPageToken = res1.nextpage || res2.nextpage || res3.nextpage || null;
+        var kwVideos = []
+          .concat((kwResults[0].items||[]).filter(i=>i.type==='stream'))
+          .concat((kwResults[1].items||[]).filter(i=>i.type==='stream'));
+        kwVideos.sort(() => 0.5 - Math.random());
 
-        // Tamamen rastgele karıştır
-        allItems.sort(() => 0.5 - Math.random());
+        nextPageToken = kwResults[0].nextpage || kwResults[1].nextpage || null;
 
-        // Tek bir kişinin tüm videoları kaplamasını engelle (aynı kanaldan en fazla 2 video)
-        var mixedItems = [];
-        var channelCounts = {};
-        allItems.forEach(item => {
-          var ch = item.uploaderName || 'Kanal';
-          channelCounts[ch] = (channelCounts[ch] || 0) + 1;
-          if(channelCounts[ch] <= 2){
-            mixedItems.push(item);
+        // Abone olunan kanalların videolarını ve benzer videoları zengin şekilde harmanla
+        var mixedFeed = [];
+        var seenIds = new Set();
+        var maxLen = Math.max(subVideos.length, kwVideos.length);
+
+        for(var i = 0; i < maxLen; i++){
+          if(subVideos[i]){
+            var sid = vid(subVideos[i].url);
+            if(sid && !seenIds.has(sid)){
+              seenIds.add(sid);
+              mixedFeed.push(subVideos[i]);
+            }
           }
-        });
+          if(kwVideos[i*2]){
+            var k1id = vid(kwVideos[i*2].url);
+            if(k1id && !seenIds.has(k1id)){
+              seenIds.add(k1id);
+              mixedFeed.push(kwVideos[i*2]);
+            }
+          }
+          if(kwVideos[i*2+1]){
+            var k2id = vid(kwVideos[i*2+1].url);
+            if(k2id && !seenIds.has(k2id)){
+              seenIds.add(k2id);
+              mixedFeed.push(kwVideos[i*2+1]);
+            }
+          }
+        }
 
-        if(mixedItems.length < 12) mixedItems = allItems;
+        if(mixedFeed.length < 8) mixedFeed = kwVideos.length > 0 ? kwVideos : subVideos;
 
-        renderFeed(f, mixedItems, false);
+        renderFeed(f, mixedFeed, false);
       }catch(e){
         f.innerHTML=`<div class="ld">Bağlantı hatası. Tekrar deneyin.</div>`;
       }
@@ -523,7 +570,7 @@
       setTimeout(checkOrientation, 250);
     });
 
-    // 3. KANAL
+    // 3. KANAL (EN YENİDEN ESKİYE DOĞRU SIRALANIR)
     async function openChan(n,u,a){
       history.pushState({v:'c'},'');
       curCN=n;curCU=u;curCA=a||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=065fd4&color=fff&size=128`;
@@ -534,21 +581,24 @@
       gid("cV").style.display="block";
       gid("cV").scrollTop=0;
       var l=gid("cVL");
-      l.innerHTML=`<div class="ld">Kanalın videoları yükleniyor...</div>`;
+      l.innerHTML=`<div class="ld">Kanalın en yeni videoları yükleniyor...</div>`;
 
-      if(u&&u.includes('/channel/')){
-        var cid=u.replace('/channel/','');
-        try{
-          var r=await fetch(`${P}/channel/${cid}`);
-          var d=await r.json();
-          if(d.avatarUrl) gid("cpAv").src=d.avatarUrl;
-          if(d.relatedStreams&&d.relatedStreams.length>0){renderFeed(l,d.relatedStreams,false);return;}
-        }catch(e){}
-      }
       try{
-        var r2=await fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=videos`);
-        var d2=await r2.json();
-        renderFeed(l,(d2.items||[]).filter(i=>i.type==='stream'),false);
+        var r = await fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=videos`);
+        var d = await r.json();
+        var items = (d.items||[]).filter(i=>i.type==='stream');
+
+        // Bu kanala ait videoları filtrele
+        var chItems = items.filter(i => 
+          (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
+          (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
+        );
+        if(chItems.length < 3) chItems = items;
+
+        // EN YENİDEN ESKİYE DOĞRU SIRALA
+        sortNewest(chItems);
+
+        renderFeed(l, chItems, false);
       }catch(e){l.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
     }
     function closeChan(pop){
@@ -920,25 +970,52 @@
       }
     }
 
+    // ABONELİKLER: ABONE OLUNAN KANALLARIN EN YENİ VİDEOLARI (EN YENİDEN ESKİYE)
     async function loadSubF(){
-      var f=gid("vList"),s=getSubs();
-      if(!s.length){f.innerHTML=`<div class="ld">Henüz abone olduğunuz kanal yok.<br>Üstteki büyütece <b>@okankarali</b> yazarak abone olabilirsiniz.</div>`;return}
-      f.innerHTML=`<div class="ld">Abonelikleriniz yükleniyor...</div>`;
-      var sub=s[Math.floor(Math.random()*s.length)];
-
-      if(sub.url&&sub.url.includes('/channel/')){
-        var cid=sub.url.replace('/channel/','');
-        try{
-          var r=await fetch(`${P}/channel/${cid}`);
-          var d=await r.json();
-          if(d.relatedStreams&&d.relatedStreams.length>0){renderFeed(f,d.relatedStreams,false);return}
-        }catch(e){}
+      var f=gid("vList"), s=getSubs();
+      if(!s.length){
+        f.innerHTML=`<div class="ld">Henüz abone olduğunuz kanal yok.<br>Üstteki büyütece <b>@okankarali</b> yazarak abone olabilirsiniz.</div>`;
+        return;
       }
+      f.innerHTML=`<div class="ld">Abone olduğunuz kanalların en yeni videoları yükleniyor...</div>`;
+
       try{
-        var r2=await fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=videos`);
-        var d2=await r2.json();
-        renderFeed(f,(d2.items||[]).filter(i=>i.type==='stream'),false);
-      }catch(e){f.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
+        var targets = s.slice(0, 10);
+        var promises = targets.map(ch =>
+          fetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=videos`)
+            .then(r => r.json())
+            .then(d => {
+              var streams = (d.items || []).filter(i => i.type === 'stream');
+              var matched = streams.filter(i => 
+                (i.uploaderName||'').toLowerCase().includes(ch.name.toLowerCase()) || 
+                ch.name.toLowerCase().includes((i.uploaderName||'').toLowerCase())
+              );
+              return matched.length > 0 ? matched.slice(0, 4) : streams.slice(0, 3);
+            })
+            .catch(() => [])
+        );
+
+        var results = await Promise.all(promises);
+        var allSubVideos = [];
+        var seenIds = new Set();
+
+        results.forEach(arr => {
+          arr.forEach(item => {
+            var id = vid(item.url);
+            if(id && !seenIds.has(id)){
+              seenIds.add(id);
+              allSubVideos.push(item);
+            }
+          });
+        });
+
+        // EN YENİDEN ESKİYE DOĞRU SIRALA
+        sortNewest(allSubVideos);
+
+        renderFeed(f, allSubVideos, false);
+      }catch(e){
+        f.innerHTML=`<div class="ld">Abonelik videoları yüklenemedi.</div>`;
+      }
     }
 
     // PWA YÜKLEME (BEFOREINSTALLPROMPT) DESTEĞİ
