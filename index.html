@@ -21,7 +21,7 @@
   
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-    body{background:#fff;color:#0f0f0f;padding-bottom:56px;overflow-x:hidden}
+    html,body{background:#fff;color:#0f0f0f;padding-bottom:56px;overflow-x:hidden;overscroll-behavior-y:contain;overscroll-behavior:contain}
 
     /* ÜST BAR */
     .yt-h{position:sticky;top:0;height:48px;z-index:250;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #e5e5e5}
@@ -61,8 +61,8 @@
     .vt{font-size:.95rem;font-weight:500;line-height:1.35;color:#0f0f0f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
     .vs{font-size:.78rem;color:#606060}
 
-    /* İZLEME EKRANI (16:9 - ANDROID 9'DA VİDEONUN YARIM ÇIKMASINI ÖNLER) */
-    .wv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:200;overflow-y:auto}
+    /* İZLEME EKRANI (Z-INDEX 350: ÜST BAR VE KATEGORİLERİN ALTINDA KALMAYI ÖNLER) */
+    .wv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:350;overflow-y:auto;overscroll-behavior-y:contain}
     .pw{width:100%;height:0;padding-bottom:56.25%;position:sticky;top:0;z-index:201;background:#000;overflow:hidden}
     .pw iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
     .wi{padding:14px;border-bottom:1px solid #e5e5e5}
@@ -95,7 +95,7 @@
       overflow:hidden!important;
       box-shadow:0 8px 24px rgba(0,0,0,0.5)!important;
       background:#000!important;
-      z-index:295!important;
+      z-index:360!important;
       border:1px solid rgba(255,255,255,0.2)!important;
       cursor:pointer!important;
       touch-action:none;
@@ -390,20 +390,30 @@
   <script>
     // PIPED API - SINIRSIZ ve KOTASIZ
     const P = "https://api.piped.private.coffee";
+
+    // TÜRKÇE KONUM VE DİL DESTEĞİ İLE API ÇAĞRISI (İngilizce Başlıkları Önler)
+    function apiFetch(url){
+      return fetch(url, {
+        headers: {
+          'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.1'
+        }
+      });
+    }
+
     const KW = [
-      "çiçek yetiştirme ve bahçe videoları",
-      "çiçekler",
-      "pasta ve tatlı tarifleri",
-      "örgü dantel ve el işleri",
-      "doğa ve manzara videoları",
-      "sevimli kedi ve hayvan videoları",
-      "köy hayatı ve köy kahvaltıları",
+      "türkçe çiçek yetiştirme ve bahçe videoları",
       "çiçek bakımı püf noktaları",
+      "çiçekler",
+      "pasta ve tatlı tarifleri nefis",
+      "örgü modelleri ve el işleri",
+      "türkiye doğa ve manzara videoları",
+      "sevimli kedi ve hayvan videoları",
+      "anadolu köy hayatı ve köy kahvaltıları",
       "nefis yemek tarifleri",
-      "karadeniz şarkıları",
-      "rize yaylalar",
-      "huzur veren ilahiler",
-      "karadeniz türküsü"
+      "karadeniz şarkıları türküleri",
+      "rize yaylaları türkiye",
+      "huzur veren ilahiler dinle",
+      "karadeniz türküsü dinle"
     ];
 
     const SHORT_KW = [
@@ -449,7 +459,7 @@
       currentFeedTarget = 'vList';
 
       try{
-        var r = await fetch(`${P}/search?q=${encodeURIComponent(cat)}&filter=videos`);
+        var r = await apiFetch(`${P}/search?q=${encodeURIComponent(cat)}&filter=videos`);
         var d = await r.json();
         var items = (d.items || []).filter(i => i.type === 'stream');
         nextPageToken = d.nextpage || null;
@@ -536,22 +546,26 @@
       var s = getSubs();
       var subPromises = [];
 
-      // Abone olunan TÜM kanallardan en yeni videoları çek (en fazla 12 kanal)
+      // Abone olunan TÜM kanallardan en yeni videoları çek (hem doğrudan kanal sayfasından hem aramadan)
       if(s.length > 0){
         s.slice(0, 12).forEach(sub => {
-          subPromises.push(
-            fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=all`)
-              .then(r => r.json())
-              .then(d => {
-                var streams = (d.items || []).filter(i => i.type === 'stream');
-                var matched = streams.filter(i => 
-                  (i.uploaderName||'').toLowerCase().includes(sub.name.toLowerCase()) || 
-                  sub.name.toLowerCase().includes((i.uploaderName||'').toLowerCase())
-                );
-                return matched.length > 0 ? matched.slice(0, 4) : streams.slice(0, 2);
-              })
-              .catch(() => [])
-          );
+          var pDirect = (sub.url && (sub.url.includes('/channel/') || sub.url.includes('/@'))) ?
+            apiFetch(`${P}${sub.url}`).then(r => r.json()).then(d => d.relatedStreams || []).catch(() => []) :
+            Promise.resolve([]);
+
+          var pSearch = apiFetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=all`)
+            .then(r => r.json())
+            .then(d => {
+              var streams = (d.items || []).filter(i => i.type === 'stream');
+              var matched = streams.filter(i => 
+                (i.uploaderName||'').toLowerCase().includes(sub.name.toLowerCase()) || 
+                sub.name.toLowerCase().includes((i.uploaderName||'').toLowerCase())
+              );
+              return matched.length > 0 ? matched.slice(0, 4) : streams.slice(0, 2);
+            })
+            .catch(() => []);
+
+          subPromises.push(Promise.all([pDirect, pSearch]).then(([dir, sch]) => dir.concat(sch)));
         });
       }
 
@@ -562,8 +576,8 @@
       lastQuery = q1;
 
       var kwPromises = [
-        fetch(`${P}/search?q=${encodeURIComponent(q1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-        fetch(`${P}/search?q=${encodeURIComponent(q2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
+        apiFetch(`${P}/search?q=${encodeURIComponent(q1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
+        apiFetch(`${P}/search?q=${encodeURIComponent(q2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
       ];
 
       try{
@@ -656,7 +670,7 @@
       f.appendChild(ldDiv);
 
       try{
-        var r=await fetch(`${P}/nextpage/search?q=${encodeURIComponent(lastQuery)}&filter=videos&nextpage=${encodeURIComponent(nextPageToken)}`);
+        var r=await apiFetch(`${P}/nextpage/search?q=${encodeURIComponent(lastQuery)}&filter=videos&nextpage=${encodeURIComponent(nextPageToken)}`);
         var d=await r.json();
         var items=(d.items||[]).filter(i=>i.type==='stream');
         nextPageToken=d.nextpage||null;
@@ -863,36 +877,48 @@
       document.body.classList.add('in-watch');
     }
 
-    // DOKUNMATİK JESTLER: Aşağı kaydırarak küçültme & Yukarı kaydırarak kapatma
+    // DOKUNMATİK JESTLER: Basılı tutup aşağı kaydırarak küçültme & Yukarı kaydırarak kapatma
     (function setupVideoMiniGestures(){
       var wV = gid("wV");
       var pWrap = gid("playerWrap");
-      var wInfo = gid("wInfo");
       var miniCtrls = gid("miniCtrls");
 
       var startY = 0, startX = 0, diffY = 0, diffX = 0;
-      var isDraggingDown = false;
+      var holdTimer = null;
+      var isHeld = false;
       var isMiniDraggingUp = false;
 
-      // 1. TAM EKRANDAYKEN AŞAĞI KAYDIRINCA KÜÇÜK OYNATICIYA DÖNÜŞTÜR
+      // 1. VİDEONUN ÜZERİNDE BASILI TUTUP AŞAĞI KAYDIRINCA KÜÇÜK OYNATICIYA DÖNÜŞTÜR
       function onWatchTouchStart(e){
         if(wV.classList.contains('mini') || e.touches.length !== 1) return;
-        if(wV.scrollTop > 8) return;
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
         diffY = 0;
         diffX = 0;
-        isDraggingDown = true;
-        wV.style.transition = 'none';
+        isHeld = false;
+        clearTimeout(holdTimer);
+        // Basılı tutma süresi: 250ms (kazaen küçülmeyi tamamen engeller)
+        holdTimer = setTimeout(function(){
+          isHeld = true;
+          wV.style.transition = 'none';
+        }, 250);
       }
 
       function onWatchTouchMove(e){
-        if(!isDraggingDown || e.touches.length !== 1) return;
+        if(wV.classList.contains('mini') || e.touches.length !== 1) return;
         diffY = e.touches[0].clientY - startY;
         diffX = e.touches[0].clientX - startX;
 
-        // Yalnızca aşağı doğru çekiliyorsa
-        if(diffY > 10 && diffY > Math.abs(diffX)){
+        // Eğer 250ms basılı tutulmadan parmak kaydırıldıysa basılı tutmayı iptal et
+        if(!isHeld){
+          if(Math.abs(diffY) > 8 || Math.abs(diffX) > 8){
+            clearTimeout(holdTimer);
+          }
+          return;
+        }
+
+        // Basılı tutulduysa ve aşağı doğru çekiliyorsa
+        if(isHeld && diffY > 10 && diffY > Math.abs(diffX)){
           var clamped = Math.min(diffY, 180);
           wV.style.transform = `translate3d(0, ${clamped}px, 0)`;
           wV.style.opacity = Math.max(0.65, 1 - (diffY / 450));
@@ -900,11 +926,12 @@
       }
 
       function onWatchTouchEnd(e){
-        if(!isDraggingDown) return;
-        isDraggingDown = false;
+        clearTimeout(holdTimer);
+        if(!isHeld) return;
+        isHeld = false;
         wV.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.22s';
 
-        // 40 pikselden fazla aşağı kaydırıldıysa küçült
+        // Basılı tutulup 40 pikselden fazla aşağı kaydırıldıysa küçült
         if(diffY > 40 && diffY > Math.abs(diffX)){
           minimizeVideo();
         } else {
@@ -959,15 +986,10 @@
         }
       }
 
+      // Sadece video oynatıcı alanına bağla (alttaki içerik alanına dokunulduğunda kazaen küçülmez)
       pWrap.addEventListener('touchstart', onWatchTouchStart, { passive: true });
       pWrap.addEventListener('touchmove', onWatchTouchMove, { passive: true });
       pWrap.addEventListener('touchend', onWatchTouchEnd);
-
-      if(wInfo){
-        wInfo.addEventListener('touchstart', onWatchTouchStart, { passive: true });
-        wInfo.addEventListener('touchmove', onWatchTouchMove, { passive: true });
-        wInfo.addEventListener('touchend', onWatchTouchEnd);
-      }
 
       if(miniCtrls){
         miniCtrls.addEventListener('touchstart', onMiniTouchStart, { passive: true });
@@ -1057,26 +1079,26 @@
 
       try{
         var fetchArr = [
-          fetch(`${P}/search?q=${encodeURIComponent(query)}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]}))
+          apiFetch(`${P}/search?q=${encodeURIComponent(query)}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]}))
         ];
 
         // İlgili kategoriyi zenginleştirmek için 2. arama
         if(lower.includes('çiçek') || lower.includes('cicek') || lower.includes('bahçe') || lower.includes('bitki')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("çiçek yetiştirme püf noktaları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("çiçek yetiştirme püf noktaları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('pasta') || lower.includes('tatlı') || lower.includes('kek')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("en lezzetli pasta ve tatlı tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("en lezzetli pasta ve tatlı tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('örgü') || lower.includes('dantel') || lower.includes('el işi')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("kolay örgü dantel modelleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("kolay örgü dantel modelleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('doğa') || lower.includes('manzara')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("harika doğa ve manzara görüntüleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("harika doğa ve manzara görüntüleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('kedi') || lower.includes('hayvan')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("en komik ve sevimli kedi videoları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("en komik ve sevimli kedi videoları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('köy') || lower.includes('kahvaltı')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("köy hayatı doğal yaşam kahvaltı")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("köy hayatı doğal yaşam kahvaltı")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('yemek') || lower.includes('tarif')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("nefis pratik yemek tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("nefis pratik yemek tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         } else if(lower.includes('karadeniz') || lower.includes('rize') || lower.includes('türkü')){
-          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("karadeniz müzikleri dinle")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+          fetchArr.push(apiFetch(`${P}/search?q=${encodeURIComponent("karadeniz müzikleri dinle")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
         }
 
         var results = await Promise.all(fetchArr);
@@ -1167,17 +1189,44 @@
       sList.innerHTML=`<div class="ld">Kanalın Shorts videoları yükleniyor...</div>`;
 
       try{
-        var [rVideos, rShorts] = await Promise.all([
-          fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=all`).then(r=>r.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(n + " #shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
-        ]);
+        var fetchPromises = [
+          apiFetch(`${P}/search?q=${encodeURIComponent(n)}&filter=all`).then(r=>r.json()).catch(()=>({items:[]})),
+          apiFetch(`${P}/search?q=${encodeURIComponent(n + " #shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
+        ];
+
+        // Kanalın doğrudan URL'si varsa (/channel/UC... veya /@...) en güncel videoları doğrudan kanal sayfasından çek
+        if(u && (u.includes('/channel/') || u.includes('/c/') || u.includes('/@') || u.includes('/user/'))){
+          fetchPromises.push(
+            apiFetch(`${P}${u}`).then(r=>r.json()).catch(()=>({relatedStreams:[]}))
+          );
+        }
+
+        var results = await Promise.all(fetchPromises);
+        var rVideos = results[0];
+        var rShorts = results[1];
+        var rDirect = results[2] || { relatedStreams: [] };
 
         var allItems = (rVideos.items||[]).filter(i=>i.type==='stream');
-        var chItems = allItems.filter(i => 
+        if(rDirect.relatedStreams && rDirect.relatedStreams.length > 0){
+          allItems = allItems.concat(rDirect.relatedStreams);
+        }
+
+        // Tekilleştir (Video ID'sine göre)
+        var seenIds = new Set();
+        var uniqueItems = [];
+        allItems.forEach(item => {
+          var id = vid(item.url);
+          if(id && !seenIds.has(id)){
+            seenIds.add(id);
+            uniqueItems.push(item);
+          }
+        });
+
+        var chItems = uniqueItems.filter(i => 
           (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
           (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
         );
-        if(chItems.length < 3) chItems = allItems;
+        if(chItems.length < 3) chItems = uniqueItems;
         sortNewest(chItems);
         renderFeed(vList, chItems, false);
 
@@ -1350,7 +1399,7 @@
       currentFeedTarget='vList';
 
       try{
-        var r=await fetch(`${P}/search?q=${encodeURIComponent(q)}&filter=all`);
+        var r=await apiFetch(`${P}/search?q=${encodeURIComponent(q)}&filter=all`);
         var d=await r.json();
         f.innerHTML="";
         if(!d.items||!d.items.length){f.innerHTML=`<div class="ld">Sonuç bulunamadı.</div>`;return}
@@ -1390,9 +1439,9 @@
 
       try {
         var [r1, r2, r3] = await Promise.all([
-          fetch(`${P}/search?q=${encodeURIComponent(k1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(k2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(k3)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
+          apiFetch(`${P}/search?q=${encodeURIComponent(k1)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
+          apiFetch(`${P}/search?q=${encodeURIComponent(k2)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]})),
+          apiFetch(`${P}/search?q=${encodeURIComponent(k3)}&filter=videos`).then(r=>r.json()).catch(()=>({items:[]}))
         ]);
 
         var all = []
@@ -1684,9 +1733,13 @@
       f.innerHTML=`<div class="ld">Abone olduğunuz kanalların en yeni videoları yükleniyor...</div>`;
 
       try{
-        var targets = s.slice(0, 10);
-        var promises = targets.map(ch =>
-          fetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=all`)
+        var targets = s.slice(0, 12);
+        var promises = targets.map(ch => {
+          var pDirect = (ch.url && (ch.url.includes('/channel/') || ch.url.includes('/@'))) ?
+            apiFetch(`${P}${ch.url}`).then(r => r.json()).then(d => d.relatedStreams || []).catch(() => []) :
+            Promise.resolve([]);
+
+          var pSearch = apiFetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=all`)
             .then(r => r.json())
             .then(d => {
               var streams = (d.items || []).filter(i => i.type === 'stream');
@@ -1696,8 +1749,10 @@
               );
               return matched.length > 0 ? matched.slice(0, 6) : streams.slice(0, 4);
             })
-            .catch(() => [])
-        );
+            .catch(() => []);
+
+          return Promise.all([pDirect, pSearch]).then(([dir, sch]) => dir.concat(sch));
+        });
 
         var results = await Promise.all(promises);
         var allSubVideos = [];
