@@ -43,6 +43,12 @@
     .sh-del{background:none;border:none;color:#999;font-size:1.3rem;padding:0 8px;cursor:pointer;line-height:1}
     .sh-title{padding:12px 16px 4px;font-size:.75rem;font-weight:700;color:#606060;letter-spacing:.5px;text-transform:uppercase}
 
+    /* KATEGORİ KATALOĞU (YOUTUBE CHIPS ÇUBUĞU) */
+    .cat-bar{display:flex;gap:8px;padding:8px 12px;overflow-x:auto;background:#fff;position:sticky;top:48px;z-index:240;border-bottom:1px solid #e5e5e5;scrollbar-width:none;-webkit-overflow-scrolling:touch;white-space:nowrap}
+    .cat-bar::-webkit-scrollbar{display:none}
+    .chip{flex-shrink:0;padding:6px 14px;border-radius:8px;font-size:.82rem;font-weight:500;border:none;background:rgba(0,0,0,.06);color:#0f0f0f;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,color .2s}
+    .chip.ac{background:#0f0f0f;color:#fff;font-weight:600}
+
     /* VİDEO AKIŞI (16:9 - TÜM ESKİ ANDROID'LERLE UYUMLU) */
     .feed{display:flex;flex-direction:column;gap:16px;margin-top:4px}
     .vc{width:100%;cursor:pointer}
@@ -69,9 +75,78 @@
     .bsub{background:#0f0f0f;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer}
     .bsub.sd{background:#f2f2f2;color:#0f0f0f}
 
-    /* BÜYÜT SİMGESİ VE BUTONLARI */
-    .pw-fs-btn{position:absolute;bottom:8px;right:8px;z-index:205;background:rgba(0,0,0,.75);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer}
+    /* BUTONLAR VE KÜÇÜK OYNATICI (MINIPLAYER) MODU */
     .w-fs-btn{background:#f2f2f2;border:none;border-radius:16px;padding:5px 12px;font-size:.78rem;font-weight:600;color:#0f0f0f;display:flex;align-items:center;gap:6px;cursor:pointer}
+    .w-drag-bar{position:absolute;top:0;left:0;right:0;height:44px;z-index:210;display:flex;align-items:center;padding:0 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.55),transparent);pointer-events:auto}
+    .w-down-btn{background:none;border:none;color:#fff;font-size:1.25rem;cursor:pointer;padding:6px 8px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));display:flex;align-items:center;justify-content:center}
+
+    /* KÜÇÜK OYNATICI (YOUTUBE MINIPLAYER) */
+    #wV{transition:transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.22s, width 0.25s, height 0.25s, border-radius 0.25s}
+    #wV.mini{
+      display:block!important;
+      position:fixed!important;
+      top:auto!important;
+      left:auto!important;
+      right:12px!important;
+      bottom:62px!important;
+      width:180px!important;
+      height:101px!important;
+      border-radius:12px!important;
+      overflow:hidden!important;
+      box-shadow:0 8px 24px rgba(0,0,0,0.5)!important;
+      background:#000!important;
+      z-index:295!important;
+      border:1px solid rgba(255,255,255,0.2)!important;
+      cursor:pointer!important;
+      touch-action:none;
+      will-change:transform,opacity;
+    }
+    #wV.mini .pw{
+      position:absolute!important;
+      top:0!important;
+      left:0!important;
+      width:100%!important;
+      height:100%!important;
+      padding-bottom:0!important;
+    }
+    #wV.mini .pw iframe{
+      width:100%!important;
+      height:100%!important;
+      pointer-events:none!important;
+    }
+    #wV.mini .w-drag-bar,
+    #wV.mini .wi,
+    #wV.mini > div:not(.pw):not(.mini-ctrls),
+    #wV.mini #relL{
+      display:none!important;
+    }
+    .mini-ctrls{
+      display:none;
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      z-index:220;
+      background:transparent;
+    }
+    #wV.mini .mini-ctrls{
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-end;
+      padding:6px;
+    }
+    .mini-close-btn{
+      background:rgba(0,0,0,0.7);
+      color:#fff;
+      border:none;
+      border-radius:50%;
+      width:26px;
+      height:26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+      cursor:pointer;
+      backdrop-filter:blur(4px);
+    }
 
     /* BÜYÜT SİMGESİNE BASILDIĞINDA TAM EKRAN YAN MOD */
     body.in-fs-landscape #wV{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;background:#000!important;z-index:99999!important;overflow:hidden!important;padding:0!important}
@@ -195,20 +270,38 @@
     <div id="srchHist" class="srch-hist"></div>
   </div>
 
+  <!-- KATEGORİ KATALOĞU (YOUTUBE CHIPS) -->
+  <div id="catBar" class="cat-bar">
+    <button class="chip ac" onclick="selectCat('', this)">Tümü</button>
+    <button class="chip" onclick="selectCat('Çiçek yetiştirme ve bahçe videoları', this)">Çiçek & Bahçe</button>
+    <button class="chip" onclick="selectCat('Çiçekler', this)">Çiçekler</button>
+    <button class="chip" onclick="selectCat('Pasta ve tatlı tarifleri', this)">Pasta & Tatlı</button>
+    <button class="chip" onclick="selectCat('Örgü, dantel ve el işleri', this)">Örgü & El İşleri</button>
+    <button class="chip" onclick="selectCat('Doğa ve manzara videoları', this)">Doğa & Manzara</button>
+    <button class="chip" onclick="selectCat('Sevimli kedi ve hayvan videoları', this)">Sevimli Hayvanlar</button>
+    <button class="chip" onclick="selectCat('Köy hayatı ve köy kahvaltıları', this)">Köy Hayatı</button>
+    <button class="chip" onclick="selectCat('nefis yemek tarifleri', this)">Yemek Tarifleri</button>
+    <button class="chip" onclick="selectCat('karadeniz şarkıları', this)">Karadeniz</button>
+    <button class="chip" onclick="selectCat('huzur veren ilahiler', this)">İlahiler</button>
+  </div>
+
   <div id="subBar" class="sab" style="display:none"></div>
 
   <!-- ANA SAYFA -->
   <main id="vList" class="feed"></main>
 
   <!-- İZLEME -->
-  <div id="wV" class="wv">
+  <div id="wV" class="wv" onclick="if(this.classList.contains('mini')) maximizeVideo(event)">
     <div class="pw" id="playerWrap">
+      <div class="w-drag-bar" id="wDragBar">
+        <button class="w-down-btn" onclick="minimizeVideo()" title="Küçült"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
       <iframe id="wIf" allowfullscreen allow="autoplay"></iframe>
-      <button id="pwFsBtn" class="pw-fs-btn" onclick="toggleFullScreenLandscape()" title="Tam Ekran Yap">
-        <i class="fa-solid fa-expand"></i>
-      </button>
     </div>
-    <div class="wi">
+    <div class="mini-ctrls" id="miniCtrls">
+      <button class="mini-close-btn" onclick="event.stopPropagation();closeW(false)" title="Kapat">&times;</button>
+    </div>
+    <div class="wi" id="wInfo">
       <div id="wTt" class="wtt"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
         <div class="wm" id="wMt">İzleniyor</div>
@@ -298,24 +391,33 @@
     // PIPED API - SINIRSIZ ve KOTASIZ
     const P = "https://api.piped.private.coffee";
     const KW = [
+      "çiçek yetiştirme ve bahçe videoları",
+      "çiçekler",
+      "pasta ve tatlı tarifleri",
+      "örgü dantel ve el işleri",
+      "doğa ve manzara videoları",
+      "sevimli kedi ve hayvan videoları",
+      "köy hayatı ve köy kahvaltıları",
+      "çiçek bakımı püf noktaları",
+      "nefis yemek tarifleri",
       "karadeniz şarkıları",
       "rize yaylalar",
-      "çiçek bakımı",
       "huzur veren ilahiler",
-      "nefis yemek tarifleri",
-      "karadeniz türküsü",
-      "yemek tarifleri",
-      "çiçek çeşitleri"
+      "karadeniz türküsü"
     ];
 
     const SHORT_KW = [
+      "çiçek bakımı #shorts",
+      "bahçe çiçekleri #shorts",
+      "pasta tarifleri #shorts",
+      "örgü modelleri #shorts",
+      "doğa manzaraları #shorts",
+      "sevimli kediler #shorts",
+      "köy hayatı #shorts",
       "karadeniz #shorts",
       "rize #shorts",
-      "çiçek bakımı #shorts",
-      "huzur veren ilahiler #shorts",
       "nefis yemek tarifleri #shorts",
-      "yemek tarifleri #shorts",
-      "karadeniz türküsü #shorts"
+      "huzur veren ilahiler #shorts"
     ];
 
     let curNav='home', curVC='', curVU='', curVA='';
@@ -327,12 +429,55 @@
     let lastQuery = '';
     let isLoadingMore = false;
     let currentFeedTarget = 'vList';
+    let currentCat = '';
+
+    // KATEGORİ KATALOĞUNDAN SEÇİM YAPMA (YOUTUBE CHIPS)
+    async function selectCat(cat, btn){
+      currentCat = cat;
+      document.querySelectorAll('#catBar .chip').forEach(b => b.classList.remove('ac'));
+      if(btn) btn.classList.add('ac');
+
+      if(!cat){
+        loadHome();
+        return;
+      }
+
+      var f = gid("vList");
+      f.innerHTML = `<div class="ld">"${cat}" videoları yükleniyor...</div>`;
+      nextPageToken = null;
+      lastQuery = cat;
+      currentFeedTarget = 'vList';
+
+      try{
+        var r = await fetch(`${P}/search?q=${encodeURIComponent(cat)}&filter=videos`);
+        var d = await r.json();
+        var items = (d.items || []).filter(i => i.type === 'stream');
+        nextPageToken = d.nextpage || null;
+
+        f.innerHTML = "";
+        if(!items.length){
+          f.innerHTML = `<div class="ld">Bu kategoride video bulunamadı.</div>`;
+          return;
+        }
+
+        renderFeed(f, items, false);
+      }catch(e){
+        f.innerHTML = `<div class="ld">Videolar yüklenemedi. Tekrar deneyin.</div>`;
+      }
+    }
 
     // 3. MADDE: YOUTUBE LOGOSUNA BASINCA HER YERDEN ANA SAYFAYA DÖN
     function goHome(){
-      closeW(false);
+      if(document.body.classList.contains('in-watch')){
+        minimizeVideo();
+      }
       closeChan(false);
       closeSrch();
+      currentCat = '';
+      document.querySelectorAll('#catBar .chip').forEach((b, i) => {
+        if(i === 0) b.classList.add('ac');
+        else b.classList.remove('ac');
+      });
       nav('home');
       window.scrollTo({top: 0, behavior: 'smooth'});
     }
@@ -344,7 +489,13 @@
         return;
       }
       if(gid("cV").style.display==="block") closeChan(false);
-      else if(gid("wV").style.display==="block") closeW(false);
+      else if(gid("wV").style.display==="block"){
+        if(!gid("wV").classList.contains('mini')){
+          minimizeVideo();
+        } else {
+          closeW(false);
+        }
+      }
       else if(curNav === 'shorts') nav('home');
       else if(gid("srchW").style.display==="flex") closeSrch();
     });
@@ -375,7 +526,7 @@
       });
     }
 
-    // 1. ANA SAYFA: Abone olunan kanalların en son videoları + benzer/kategori videoları harmanlanır
+    // 1. ANA SAYFA: Abone olunan kanallardan yeni yüklenen videolar en başta, ardından kategoriler harmanlanır
     async function loadHome(){
       var f=gid("vList");
       f.innerHTML=`<div class="ld">Videolar yükleniyor...</div>`;
@@ -385,20 +536,26 @@
       var s = getSubs();
       var subPromises = [];
 
-      // Abone olunan kanallardan en son videoları çek
+      // Abone olunan TÜM kanallardan en yeni videoları çek (en fazla 12 kanal)
       if(s.length > 0){
-        var targets = [...s].sort(() => 0.5 - Math.random()).slice(0, 4);
-        targets.forEach(sub => {
+        s.slice(0, 12).forEach(sub => {
           subPromises.push(
-            fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=videos`)
+            fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=all`)
               .then(r => r.json())
-              .then(d => (d.items || []).filter(i => i.type === 'stream').slice(0, 3))
+              .then(d => {
+                var streams = (d.items || []).filter(i => i.type === 'stream');
+                var matched = streams.filter(i => 
+                  (i.uploaderName||'').toLowerCase().includes(sub.name.toLowerCase()) || 
+                  sub.name.toLowerCase().includes((i.uploaderName||'').toLowerCase())
+                );
+                return matched.length > 0 ? matched.slice(0, 4) : streams.slice(0, 2);
+              })
               .catch(() => [])
           );
         });
       }
 
-      // İzin verilen / benzer konulardan da video çek
+      // İzin verilen / benzer konulardan da video çek (karadeniz, çiçek, yemek, ilahi)
       var shuffledKW = [...KW].sort(() => 0.5 - Math.random());
       var q1 = shuffledKW[0];
       var q2 = shuffledKW[1];
@@ -416,7 +573,18 @@
         ]);
 
         var subVideos = [];
-        subResults.forEach(arr => { subVideos = subVideos.concat(arr); });
+        var subSeen = new Set();
+        subResults.forEach(arr => {
+          arr.forEach(item => {
+            var id = vid(item.url);
+            if(id && !subSeen.has(id)){
+              subSeen.add(id);
+              subVideos.push(item);
+            }
+          });
+        });
+
+        // 1. MADDE: Abone olunan kanalların videolarını en yeniden eskiye sırala
         sortNewest(subVideos);
 
         var kwVideos = []
@@ -426,24 +594,36 @@
 
         nextPageToken = kwResults[0].nextpage || kwResults[1].nextpage || null;
 
-        // Abone olunan kanalların videolarını ve benzer videoları zengin şekilde harmanla
         var mixedFeed = [];
         var seenIds = new Set();
-        var maxLen = Math.max(subVideos.length, kwVideos.length);
+
+        // 1. MADDE: Abone olduğumuz kanallardan yeni video yüklendiğinde ANA SAYFADA EN BAŞTA GÖRÜNSÜN
+        var topSubCount = Math.min(3, subVideos.length);
+        for(var i = 0; i < topSubCount; i++){
+          var sid = vid(subVideos[i].url);
+          if(sid && !seenIds.has(sid)){
+            seenIds.add(sid);
+            mixedFeed.push(subVideos[i]);
+          }
+        }
+
+        // Kalan abone videoları ve kategori videolarını dengeli harmanla
+        var subRest = subVideos.slice(topSubCount);
+        var maxLen = Math.max(subRest.length, kwVideos.length);
 
         for(var i = 0; i < maxLen; i++){
-          if(subVideos[i]){
-            var sid = vid(subVideos[i].url);
-            if(sid && !seenIds.has(sid)){
-              seenIds.add(sid);
-              mixedFeed.push(subVideos[i]);
-            }
-          }
           if(kwVideos[i*2]){
             var k1id = vid(kwVideos[i*2].url);
             if(k1id && !seenIds.has(k1id)){
               seenIds.add(k1id);
               mixedFeed.push(kwVideos[i*2]);
+            }
+          }
+          if(subRest[i]){
+            var srid = vid(subRest[i].url);
+            if(srid && !seenIds.has(srid)){
+              seenIds.add(srid);
+              mixedFeed.push(subRest[i]);
             }
           }
           if(kwVideos[i*2+1]){
@@ -492,28 +672,49 @@
       isLoadingMore=false;
     }
 
-    // TÜRKÇE TARİH DÖNÜŞTÜRÜCÜ (İNGİLİZCE YAZILARI KALDIRIR)
+    // 2. MADDE: TÜRKÇE TARİH DÖNÜŞTÜRÜCÜ (EKSİKSİZ TÜM İNGİLİZCE İFADELERİ KALDIRIR VE TÜRKÇE YAPAR)
     function trDate(str, uploadedMs){
-      if(uploadedMs && uploadedMs > 0){
+      // Canlı yayın kontrolü
+      if(uploadedMs === -1 || (str && /(live|canlı)/i.test(str) && !/(streamed|ago|önce|yayınlandı)/i.test(str))){
+        return "Canlı";
+      }
+      if(str && /^upcoming$/i.test(str.trim())){
+        return "Yakında";
+      }
+
+      // Milisaniye zaman damgası varsa en doğru Türkçe süre hesabı
+      if(uploadedMs && typeof uploadedMs === 'number' && uploadedMs > 1000000000){
         var diff = Date.now() - uploadedMs;
-        if(diff > 0){
-          var sec = Math.floor(diff / 1000);
-          var min = Math.floor(sec / 60);
+        if(diff < 60000 && diff >= -180000) return "az önce";
+        if(diff >= 60000 && diff < 315360000000){
+          var min = Math.floor(diff / 60000);
           var hrs = Math.floor(min / 60);
           var days = Math.floor(hrs / 24);
+          var weeks = Math.floor(days / 7);
           var months = Math.floor(days / 30);
           var years = Math.floor(days / 365);
-          if(sec < 60) return "az önce";
+
           if(min < 60) return min + " dakika önce";
           if(hrs < 24) return hrs + " saat önce";
-          if(days < 30) return days + " gün önce";
+          if(days < 7) return days + " gün önce";
+          if(weeks < 5) return weeks + " hafta önce";
           if(months < 12) return months + " ay önce";
           return years + " yıl önce";
         }
       }
+
       if(!str) return "";
-      return str
+
+      // String metin fall-back çevirisi
+      var s = str.trim();
+      if(/^(live|live now)$/i.test(s)) return "Canlı";
+      if(/^upcoming$/i.test(s)) return "Yakında";
+
+      return s
+        .replace(/Streamed\s+live\s+/gi, '')
         .replace(/Streamed\s+/gi, '')
+        .replace(/Premiered\s+/gi, '')
+        .replace(/live\s+/gi, '')
         .replace(/hours?\s+ago/gi, 'saat önce')
         .replace(/days?\s+ago/gi, 'gün önce')
         .replace(/minutes?\s+ago/gi, 'dakika önce')
@@ -522,7 +723,14 @@
         .replace(/months?\s+ago/gi, 'ay önce')
         .replace(/years?\s+ago/gi, 'yıl önce')
         .replace(/yesterday/gi, 'dün')
-        .replace(/just now/gi, 'az önce');
+        .replace(/just now/gi, 'az önce')
+        .replace(/moments\s+ago/gi, 'az önce')
+        .replace(/an\s+hour\s+ago/gi, '1 saat önce')
+        .replace(/a\s+day\s+ago/gi, '1 gün önce')
+        .replace(/a\s+week\s+ago/gi, '1 hafta önce')
+        .replace(/a\s+month\s+ago/gi, '1 ay önce')
+        .replace(/a\s+year\s+ago/gi, '1 yıl önce')
+        .trim();
     }
 
     function renderFeed(c,items,append){
@@ -545,7 +753,7 @@
 
       var clickAct = isShortItem ? 
         `openShortItem('${id}','${esc(t)}','${esc(ch)}','${av}')` :
-        `openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')`;
+        `openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}','${vw}','${esc(ud)}')`;
 
       var card=document.createElement("div");
       card.className="vc";
@@ -564,19 +772,25 @@
       c.appendChild(card);
     }
 
-    // 2. VİDEO İZLEME VE BÜYÜT SİMGESİ İLE TAM EKRAN YATAY YAPMA
-    function openW(id,t,ch,cu,av){
+    // 2. VİDEO İZLEME
+    function openW(id,t,ch,cu,av,vw,ud){
       history.pushState({v:'w'},'');
       curVC=ch;curVU=cu;curVA=av;
+      var w = gid("wV");
+      w.classList.remove('mini');
+      w.style.transform = '';
+      w.style.opacity = '';
+      document.body.classList.remove('in-mini');
       document.body.classList.add('in-watch');
       gid("wIf").src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
       gid("wTt").textContent=t;
       gid("wCh").textContent=ch;
       gid("wAv").src=av;
+      gid("wMt").textContent=(vw?vw+' görüntüleme • ':'') + (ud?ud:'İzleniyor');
       updSub("wSb",ch);
-      gid("wV").style.display="block";
-      gid("wV").scrollTop=0;
-      loadRel();
+      w.style.display="block";
+      w.scrollTop=0;
+      loadRel(id,t,ch);
       checkOrientation();
     }
 
@@ -584,12 +798,10 @@
     function toggleFullScreenLandscape(){
       var body = document.body;
       var pw = gid("playerWrap");
-      var fsBtn = gid("pwFsBtn");
       var isFs = body.classList.contains('in-fs-landscape');
 
       if(isFs){
         body.classList.remove('in-fs-landscape');
-        if(fsBtn) fsBtn.innerHTML = `<i class="fa-solid fa-expand"></i>`;
         if(document.fullscreenElement && document.exitFullscreen){
           document.exitFullscreen().catch(()=>{});
         }
@@ -598,7 +810,6 @@
         }
       } else {
         body.classList.add('in-fs-landscape');
-        if(fsBtn) fsBtn.innerHTML = `<i class="fa-solid fa-compress"></i>`;
         if(pw && pw.requestFullscreen){
           pw.requestFullscreen().catch(()=>{});
         }
@@ -609,12 +820,19 @@
     }
 
     function closeW(pop){
+      var w = gid("wV");
       document.body.classList.remove('in-watch');
       document.body.classList.remove('in-fs-landscape');
+      document.body.classList.remove('in-mini');
       if(screen.orientation && screen.orientation.unlock){
         screen.orientation.unlock();
       }
-      gid("wV").style.display="none";
+      if(w){
+        w.classList.remove('mini');
+        w.style.transform = '';
+        w.style.opacity = '';
+        w.style.display="none";
+      }
       gid("wIf").src="";
       if(document.fullscreenElement){
         document.exitFullscreen().catch(()=>{});
@@ -622,40 +840,273 @@
       if(pop!==false&&history.state&&history.state.v==='w') history.back();
     }
 
-    // 1. MADDE: VİDEONUN ALTINDA HEP AYNI KİŞİ DEĞİL, KARIŞIK VİDEOLAR ÇIKSIN
-    async function loadRel(){
+    // YOUTUBE MOBİL GİBİ VİDEO KÜÇÜLTME (MINIPLAYER) FONKSİYONLARI VE JESTLER
+    function minimizeVideo(){
+      var w = gid("wV");
+      if(!w || w.style.display !== "block") return;
+      document.body.classList.remove('in-watch');
+      document.body.classList.remove('in-fs-landscape');
+      document.body.classList.add('in-mini');
+      w.style.transform = '';
+      w.style.opacity = '';
+      w.classList.add('mini');
+    }
+
+    function maximizeVideo(e){
+      if(e && e.target && e.target.closest && e.target.closest('.mini-close-btn')) return;
+      var w = gid("wV");
+      if(!w) return;
+      w.style.transform = '';
+      w.style.opacity = '';
+      w.classList.remove('mini');
+      document.body.classList.remove('in-mini');
+      document.body.classList.add('in-watch');
+    }
+
+    // DOKUNMATİK JESTLER: Aşağı kaydırarak küçültme & Yukarı kaydırarak kapatma
+    (function setupVideoMiniGestures(){
+      var wV = gid("wV");
+      var pWrap = gid("playerWrap");
+      var wInfo = gid("wInfo");
+      var miniCtrls = gid("miniCtrls");
+
+      var startY = 0, startX = 0, diffY = 0, diffX = 0;
+      var isDraggingDown = false;
+      var isMiniDraggingUp = false;
+
+      // 1. TAM EKRANDAYKEN AŞAĞI KAYDIRINCA KÜÇÜK OYNATICIYA DÖNÜŞTÜR
+      function onWatchTouchStart(e){
+        if(wV.classList.contains('mini') || e.touches.length !== 1) return;
+        if(wV.scrollTop > 8) return;
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+        diffY = 0;
+        diffX = 0;
+        isDraggingDown = true;
+        wV.style.transition = 'none';
+      }
+
+      function onWatchTouchMove(e){
+        if(!isDraggingDown || e.touches.length !== 1) return;
+        diffY = e.touches[0].clientY - startY;
+        diffX = e.touches[0].clientX - startX;
+
+        // Yalnızca aşağı doğru çekiliyorsa
+        if(diffY > 10 && diffY > Math.abs(diffX)){
+          var clamped = Math.min(diffY, 180);
+          wV.style.transform = `translate3d(0, ${clamped}px, 0)`;
+          wV.style.opacity = Math.max(0.65, 1 - (diffY / 450));
+        }
+      }
+
+      function onWatchTouchEnd(e){
+        if(!isDraggingDown) return;
+        isDraggingDown = false;
+        wV.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.22s';
+
+        // 40 pikselden fazla aşağı kaydırıldıysa küçült
+        if(diffY > 40 && diffY > Math.abs(diffX)){
+          minimizeVideo();
+        } else {
+          wV.style.transform = '';
+          wV.style.opacity = '';
+        }
+      }
+
+      // 2. KÜÇÜK OYNATICIYI YUKARI KAYDIRARAK KAPATMA
+      function onMiniTouchStart(e){
+        if(!wV.classList.contains('mini') || e.touches.length !== 1) return;
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+        diffY = 0;
+        diffX = 0;
+        isMiniDraggingUp = true;
+        wV.style.transition = 'none';
+      }
+
+      function onMiniTouchMove(e){
+        if(!isMiniDraggingUp || e.touches.length !== 1) return;
+        diffY = e.touches[0].clientY - startY;
+        diffX = e.touches[0].clientX - startX;
+
+        // Yukarı kaydırma
+        if(diffY < 0){
+          wV.style.transform = `translate3d(0, ${diffY}px, 0)`;
+          wV.style.opacity = Math.max(0.1, 1 + (diffY / 120));
+        }
+      }
+
+      function onMiniTouchEnd(e){
+        if(!isMiniDraggingUp) return;
+        isMiniDraggingUp = false;
+
+        // Yukarı 30 pikselden fazla kaydırıldıysa kapat
+        if(diffY < -30 && Math.abs(diffY) > Math.abs(diffX)){
+          wV.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
+          wV.style.transform = 'translate3d(0, -120px, 0)';
+          wV.style.opacity = '0';
+          setTimeout(function(){
+            closeW(false);
+          }, 180);
+        } else if(Math.abs(diffY) < 10 && Math.abs(diffX) < 10){
+          // Tıklama gibi dokunulduysa tam ekrana aç
+          maximizeVideo();
+        } else {
+          // Geri eski yerine oturt
+          wV.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
+          wV.style.transform = 'translate3d(0, 0, 0)';
+          wV.style.opacity = '1';
+        }
+      }
+
+      pWrap.addEventListener('touchstart', onWatchTouchStart, { passive: true });
+      pWrap.addEventListener('touchmove', onWatchTouchMove, { passive: true });
+      pWrap.addEventListener('touchend', onWatchTouchEnd);
+
+      if(wInfo){
+        wInfo.addEventListener('touchstart', onWatchTouchStart, { passive: true });
+        wInfo.addEventListener('touchmove', onWatchTouchMove, { passive: true });
+        wInfo.addEventListener('touchend', onWatchTouchEnd);
+      }
+
+      if(miniCtrls){
+        miniCtrls.addEventListener('touchstart', onMiniTouchStart, { passive: true });
+        miniCtrls.addEventListener('touchmove', onMiniTouchMove, { passive: true });
+        miniCtrls.addEventListener('touchend', onMiniTouchEnd);
+      }
+    })();
+
+    // 3. MADDE: İZLENEN VİDEONUN KONUSUNU TESPİT ET (Örn: Çiçek videosu ise sıradakiler çiçek olsun)
+    function detectVideoTopic(title, channel){
+      var lower = (title || '').toLowerCase();
+
+      // 1. Çiçek & Bahçe Videoları
+      if(lower.includes('çiçek') || lower.includes('cicek') || lower.includes('bahçe') || lower.includes('bahce') || lower.includes('orkide') || lower.includes('menekşe') || lower.includes('kaktüs') || lower.includes('sukulent') || lower.includes('saksı') || lower.includes('bitki') || lower.includes('yaprak') || lower.includes('sulama') || lower.includes('tohum') || lower.includes('fide')){
+        var specials = ['barış çiçeği', 'paşa kılıcı', 'para çiçeği', 'salon bitkileri', 'orkide', 'menekşe', 'kaktüs', 'sukulent', 'antoryum', 'aloe vera', 'kalanşo', 'sardunya', 'bahçe bakımı', 'çiçek yetiştirme'];
+        for(var i=0; i<specials.length; i++){
+          if(lower.includes(specials[i])){
+            return specials[i] + " bakımı";
+          }
+        }
+        return "çiçek yetiştirme ve bahçe bakımı";
+      }
+
+      // 2. Pasta ve Tatlı Tarifleri
+      if(lower.includes('pasta') || lower.includes('tatlı') || lower.includes('tatli') || lower.includes('kek') || lower.includes('kurabiye') || lower.includes('şerbet') || lower.includes('muhallebi') || lower.includes('sütlaç') || lower.includes('baklava') || lower.includes('çikolata') || lower.includes('brownie') || lower.includes('börek')){
+        var cleanT = lower.replace(/[^a-zçğıöşü0-9\s]/gi, ' ').split(/\s+/).filter(w => w.length > 2 && !['nasıl', 'yapılır', 'kolay', 'pratik', 'nefis', 'tarifi', 'yemek'].includes(w));
+        return (cleanT.slice(0, 3).join(' ') || "pasta ve tatlı") + " tarifi";
+      }
+
+      // 3. Örgü, Dantel ve El İşleri
+      if(lower.includes('örgü') || lower.includes('orgu') || lower.includes('dantel') || lower.includes('el işi') || lower.includes('elisi') || lower.includes('tığ') || lower.includes('şiş') || lower.includes('motif') || lower.includes('patik') || lower.includes('yelek') || lower.includes('lif') || lower.includes('oya') || lower.includes('iğne oyası') || lower.includes('nakış') || lower.includes('dikiş') || lower.includes('kanaviçe')){
+        return "örgü dantel ve el işleri modelleri";
+      }
+
+      // 4. Doğa ve Manzara Videoları
+      if(lower.includes('doğa') || lower.includes('doga') || lower.includes('manzara') || lower.includes('orman') || lower.includes('şelale') || lower.includes('selale') || lower.includes('nehir') || lower.includes('göl') || lower.includes('dağ') || lower.includes('kuş sesleri') || lower.includes('su sesi') || lower.includes('tabiat')){
+        return "doğa ve manzara videoları huzur";
+      }
+
+      // 5. Sevimli Kedi ve Hayvan Videoları
+      if(lower.includes('kedi') || lower.includes('köpek') || lower.includes('hayvan') || lower.includes('pati') || lower.includes('yavru kedi') || lower.includes('kediler') || lower.includes('köpekler') || lower.includes('kuş')){
+        return "sevimli kedi ve hayvan videoları";
+      }
+
+      // 6. Köy Hayatı ve Köy Kahvaltıları
+      if(lower.includes('köy hayatı') || lower.includes('koy hayati') || lower.includes('köy kahvaltısı') || lower.includes('koy kahvaltisi') || lower.includes('köyde yaşam') || lower.includes('köy') || lower.includes('çiftlik') || lower.includes('tandır') || lower.includes('odun ateşi') || lower.includes('organik yaşam')){
+        return "köy hayatı ve köy kahvaltıları";
+      }
+
+      // 7. Yemek Tarifleri
+      if(lower.includes('yemek') || lower.includes('tarif') || lower.includes('çorba') || lower.includes('köfte') || lower.includes('pilav')){
+        return "nefis pratik yemek tarifleri";
+      }
+
+      // 8. Karadeniz & Rize
+      if(lower.includes('karadeniz') || lower.includes('rize') || lower.includes('yayla') || lower.includes('tulum') || lower.includes('kemençe') || lower.includes('türkü') || lower.includes('horon') || lower.includes('trabzon') || lower.includes('artvin')){
+        if(lower.includes('şarkı') || lower.includes('türkü') || lower.includes('müzik') || lower.includes('horon') || lower.includes('tulum')){
+          return "karadeniz türküleri şarkıları";
+        }
+        return "rize karadeniz yaylaları";
+      }
+
+      // 9. Huzur & İlahi
+      if(lower.includes('ilahi') || lower.includes('kuran') || lower.includes('dua') || lower.includes('ezan') || lower.includes('zikir')){
+        return "huzur veren ilahiler dinle";
+      }
+
+      // 10. Belirli bir kanalın videosu ise başlıktan temiz 3-4 kelime ara
+      var words = title.replace(/[\[\(\{\]\)\}\|#\-–—_!?:;\*\+~"'\.\,]/g, ' ')
+                       .replace(/\s+/g, ' ')
+                       .trim()
+                       .split(' ')
+                       .filter(w => w.length > 2 && !['official', 'video', 'full', 'hd', 'yeni', 'bölüm', 've', 'ile', 'için'].includes(w.toLowerCase()));
+      if(words.length > 0){
+        return words.slice(0, 4).join(' ');
+      }
+      return channel || "çiçek yetiştirme ve bahçe";
+    }
+
+    // 3. MADDE: SIRADAKİ VİDEOLAR İZLENEN VİDEONUN AYNISI/İLGİLİ KONUSU OLSUN (Farklı kanallardan harmanlanmış)
+    async function loadRel(currentId, currentTitle, currentChannel){
       var r=gid("relL");
-      r.innerHTML=`<div class="ld">Sıradaki karışık videolar yükleniyor...</div>`;
+      r.innerHTML=`<div class="ld">İlgili benzer videolar yükleniyor...</div>`;
+
+      var query = detectVideoTopic(currentTitle, currentChannel);
+      var lower = (currentTitle || '').toLowerCase();
+
       try{
-        // 2 farklı kategoriden rastgele video ara
-        var shuffled = [...KW].sort(() => 0.5 - Math.random());
-        var k1 = shuffled[0];
-        var k2 = shuffled[1];
+        var fetchArr = [
+          fetch(`${P}/search?q=${encodeURIComponent(query)}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]}))
+        ];
 
-        var [r1, r2] = await Promise.all([
-          fetch(`${P}/search?q=${encodeURIComponent(k1)}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})),
-          fetch(`${P}/search?q=${encodeURIComponent(k2)}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]}))
-        ]);
+        // İlgili kategoriyi zenginleştirmek için 2. arama
+        if(lower.includes('çiçek') || lower.includes('cicek') || lower.includes('bahçe') || lower.includes('bitki')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("çiçek yetiştirme püf noktaları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('pasta') || lower.includes('tatlı') || lower.includes('kek')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("en lezzetli pasta ve tatlı tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('örgü') || lower.includes('dantel') || lower.includes('el işi')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("kolay örgü dantel modelleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('doğa') || lower.includes('manzara')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("harika doğa ve manzara görüntüleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('kedi') || lower.includes('hayvan')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("en komik ve sevimli kedi videoları")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('köy') || lower.includes('kahvaltı')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("köy hayatı doğal yaşam kahvaltı")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('yemek') || lower.includes('tarif')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("nefis pratik yemek tarifleri")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        } else if(lower.includes('karadeniz') || lower.includes('rize') || lower.includes('türkü')){
+          fetchArr.push(fetch(`${P}/search?q=${encodeURIComponent("karadeniz müzikleri dinle")}&filter=videos`).then(res=>res.json()).catch(()=>({items:[]})));
+        }
 
-        var allItems = (r1.items||[]).concat(r2.items||[]).filter(i=>i.type==='stream');
-        allItems.sort(() => 0.5 - Math.random());
+        var results = await Promise.all(fetchArr);
+        var allItems = [];
+        results.forEach(res => {
+          allItems = allItems.concat((res.items || []).filter(i => i.type === 'stream'));
+        });
 
-        // Farklı kanallardan 1'er video alarak harmanla
+        // İzlenmekte olan videoyu listeden çıkar
+        allItems = allItems.filter(i => vid(i.url) !== currentId);
+
+        // Tek bir kanaldan hepsi gelmesin, kanal başına en fazla 2 video alarak çeşitlendir
         var mixed = [];
-        var seenCh = new Set();
-        allItems.forEach(item=>{
-          if(!seenCh.has(item.uploaderName)){
-            seenCh.add(item.uploaderName);
+        var chCounts = {};
+        allItems.forEach(item => {
+          var ch = item.uploaderName || 'Kanal';
+          chCounts[ch] = (chCounts[ch] || 0);
+          if(chCounts[ch] < 2){
+            chCounts[ch]++;
             mixed.push(item);
           }
         });
+
         if(mixed.length < 8){
-          allItems.forEach(item=>{
+          allItems.forEach(item => {
             if(!mixed.includes(item)) mixed.push(item);
           });
         }
 
-        renderFeed(r, mixed.slice(0, 10), false);
+        renderFeed(r, mixed.slice(0, 12), false);
       }catch(e){
         r.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`;
       }
@@ -883,8 +1334,13 @@
       closeSrch();
       stopS();
       gid("sV").style.display="none";
-      gid("wV").style.display="none";
+      if(!document.body.classList.contains('in-mini')){
+        gid("wV").style.display="none";
+        gid("wIf").src="";
+      }
       gid("cV").style.display="none";
+      gid("catBar").style.display="none";
+      gid("subBar").style.display="none";
       document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
       var f=gid("vList");
       f.innerHTML=`<div class="ld">"${q}" aranıyor...</div>`;
@@ -1185,9 +1641,11 @@
     function nav(n){
       curNav=n;
       document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
-      gid("wV").style.display="none";
+      if(!document.body.classList.contains('in-mini')){
+        gid("wV").style.display="none";
+        gid("wIf").src="";
+      }
       gid("cV").style.display="none";
-      gid("wIf").src="";
       stopS();
       gid("sV").style.display="none";
       gid("subBar").style.display="none";
@@ -1195,18 +1653,24 @@
 
       if(n==='home'){
         gid("bH").classList.add("ac");
-        loadHome();
+        gid("catBar").style.display="flex";
+        if(currentCat) selectCat(currentCat);
+        else loadHome();
       }
-      else if(n==='shorts'){
-        gid("bS").classList.add("ac");
-        gid("sV").style.display="block";
-        history.pushState({v:'shorts'},'');
-        initS();
-      }
-      else if(n==='subs'){
-        gid("bA").classList.add("ac");
-        renderSBar();
-        loadSubF();
+      else {
+        gid("catBar").style.display="none";
+        if(n==='shorts'){
+          if(document.body.classList.contains('in-mini')) closeW(false);
+          gid("bS").classList.add("ac");
+          gid("sV").style.display="block";
+          history.pushState({v:'shorts'},'');
+          initS();
+        }
+        else if(n==='subs'){
+          gid("bA").classList.add("ac");
+          renderSBar();
+          loadSubF();
+        }
       }
     }
 
