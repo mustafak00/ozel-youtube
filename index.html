@@ -30,10 +30,18 @@
     .hi{display:flex;align-items:center;gap:20px;font-size:1.15rem;color:#0f0f0f}
     .pav{width:28px;height:28px;border-radius:50%;background:#00796b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:bold}
 
-    /* ARAMA */
-    .srch{display:none;position:fixed;top:0;left:0;right:0;background:#fff;padding:6px 12px;z-index:350;box-shadow:0 2px 6px rgba(0,0,0,.1);align-items:center;gap:10px;height:48px}
-    .srch input{flex:1;border:1px solid #ccc;background:#f8f8f8;border-radius:20px;padding:9px 16px;font-size:.95rem;outline:none}
-    .srch button{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#333}
+    /* ARAMA EKRANI VE SON ARAMALAR LİSTESİ */
+    .srch-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:350;flex-direction:column}
+    .srch-top{display:flex;align-items:center;padding:6px 12px;gap:10px;height:48px;border-bottom:1px solid #e5e5e5;background:#fff}
+    .srch-top input{flex:1;border:1px solid #ccc;background:#f8f8f8;border-radius:20px;padding:9px 16px;font-size:.95rem;outline:none}
+    .srch-top button{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#333}
+    .srch-hist{flex:1;overflow-y:auto;background:#fff;-webkit-overflow-scrolling:touch}
+    .sh-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f6f6f6;cursor:pointer}
+    .sh-item:active{background:#f0f0f0}
+    .sh-left{display:flex;align-items:center;gap:14px;color:#0f0f0f;font-size:.92rem;flex:1}
+    .sh-left i{color:#888;font-size:.9rem}
+    .sh-del{background:none;border:none;color:#999;font-size:1.3rem;padding:0 8px;cursor:pointer;line-height:1}
+    .sh-title{padding:12px 16px 4px;font-size:.75rem;font-weight:700;color:#606060;letter-spacing:.5px;text-transform:uppercase}
 
     /* VİDEO AKIŞI (16:9 - TÜM ESKİ ANDROID'LERLE UYUMLU) */
     .feed{display:flex;flex-direction:column;gap:16px;margin-top:4px}
@@ -61,7 +69,17 @@
     .bsub{background:#0f0f0f;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer}
     .bsub.sd{background:#f2f2f2;color:#0f0f0f}
 
-    /* 4. MADDE: TELEFON YATAY ÇEVRİLDİĞİNDE OTOMATİK TAM EKRAN */
+    /* BÜYÜT SİMGESİ VE BUTONLARI */
+    .pw-fs-btn{position:absolute;bottom:8px;right:8px;z-index:205;background:rgba(0,0,0,.75);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer}
+    .w-fs-btn{background:#f2f2f2;border:none;border-radius:16px;padding:5px 12px;font-size:.78rem;font-weight:600;color:#0f0f0f;display:flex;align-items:center;gap:6px;cursor:pointer}
+
+    /* BÜYÜT SİMGESİNE BASILDIĞINDA TAM EKRAN YAN MOD */
+    body.in-fs-landscape #wV{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;background:#000!important;z-index:99999!important;overflow:hidden!important;padding:0!important}
+    body.in-fs-landscape #wV .pw{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;padding-bottom:0!important;aspect-ratio:auto!important;z-index:100000!important}
+    body.in-fs-landscape #wV .pw iframe{width:100vw!important;height:100vh!important;border:none!important}
+    body.in-fs-landscape #wV .wi,body.in-fs-landscape #wV>div:not(.pw),body.in-fs-landscape #wV #relL,body.in-fs-landscape .yt-h,body.in-fs-landscape .bn{display:none!important}
+
+    /* TELEFON YATAY ÇEVRİLDİĞİNDE OTOMATİK TAM EKRAN */
     @media (orientation: landscape) {
       body.in-watch #wV {
         position: fixed !important;
@@ -100,15 +118,18 @@
       }
     }
 
-    /* KANAL SAYFASI */
+    /* KANAL SAYFASI VE KANAL SEKMELERİ */
     .cv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:210;overflow-y:auto}
     .ch{padding:24px 16px;text-align:center;border-bottom:1px solid #e5e5e5}
     .ch img{width:75px;height:75px;border-radius:50%;margin-bottom:10px;object-fit:cover}
     .ch h2{font-size:1.25rem}
+    .c-tabs{display:flex;border-bottom:1px solid #e5e5e5;background:#fff;position:sticky;top:0;z-index:10}
+    .ctab{flex:1;padding:12px 0;border:none;background:none;font-size:.95rem;font-weight:500;color:#606060;cursor:pointer;border-bottom:2px solid transparent;text-align:center}
+    .ctab.ac{color:#0f0f0f;font-weight:700;border-bottom:2px solid #0f0f0f}
 
     /* SHORTS TAM EKRAN VE KAYDIRMA ALANI (Üst bar ve Alt bar arasında tam oturur) */
     .sv{display:none;position:fixed;top:48px;left:0;right:0;bottom:52px;background:#000;z-index:150;overflow:hidden}
-    .sfw{width:100%;height:100%;position:relative;overflow:hidden;will-change:transform}
+    .sfw{width:100%;height:100%;position:relative;overflow:hidden;will-change:transform;transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);-webkit-backface-visibility:hidden;backface-visibility:hidden}
     .s-poster{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;filter:brightness(0.9)}
     .sfw iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:2}
     .s-touch-layer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:transparent;touch-action:none}
@@ -164,11 +185,14 @@
     </div>
   </header>
 
-  <!-- ARAMA -->
-  <div class="srch" id="srchW">
-    <button onclick="closeSrch()"><i class="fa-solid fa-arrow-left"></i></button>
-    <input type="search" id="srchI" placeholder="@kanal veya video ara..." inputmode="search" autocomplete="off" onkeydown="if(event.key==='Enter') doSrch()">
-    <button onclick="doSrch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+  <!-- ARAMA EKRANI (SON ARAMALAR VE ÖNERİLER) -->
+  <div class="srch-overlay" id="srchW">
+    <div class="srch-top">
+      <button onclick="closeSrch()"><i class="fa-solid fa-arrow-left"></i></button>
+      <input type="search" id="srchI" placeholder="@kanal veya video ara..." inputmode="search" autocomplete="off" oninput="renderSrchHist()" onkeydown="if(event.key==='Enter') doSrch()">
+      <button onclick="doSrch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+    <div id="srchHist" class="srch-hist"></div>
   </div>
 
   <div id="subBar" class="sab" style="display:none"></div>
@@ -178,10 +202,20 @@
 
   <!-- İZLEME -->
   <div id="wV" class="wv">
-    <div class="pw" id="playerWrap"><iframe id="wIf" allowfullscreen allow="autoplay"></iframe></div>
+    <div class="pw" id="playerWrap">
+      <iframe id="wIf" allowfullscreen allow="autoplay"></iframe>
+      <button id="pwFsBtn" class="pw-fs-btn" onclick="toggleFullScreenLandscape()" title="Tam Ekran Yap">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
     <div class="wi">
       <div id="wTt" class="wtt"></div>
-      <div class="wm" id="wMt">İzleniyor</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+        <div class="wm" id="wMt">İzleniyor</div>
+        <button class="w-fs-btn" onclick="toggleFullScreenLandscape()">
+          <i class="fa-solid fa-expand"></i> <span>Tam Ekran (Yan)</span>
+        </button>
+      </div>
       <div class="wcr">
         <div class="wcl" onclick="openChan(curVC,curVU,curVA)">
           <img id="wAv" class="wav" src="">
@@ -205,8 +239,12 @@
       <h2 id="cpNm"></h2>
       <div style="margin:12px 0"><button id="cpSb" class="bsub" onclick="togSub(curCN,curCU,curCA)">Abone Ol</button></div>
     </div>
-    <div style="font-weight:bold;padding:12px 14px;font-size:.95rem">Kanal Videoları</div>
+    <div class="c-tabs">
+      <button id="ctV" class="ctab ac" onclick="setChanTab('videos')">Videolar</button>
+      <button id="ctS" class="ctab" onclick="setChanTab('shorts')">Shorts</button>
+    </div>
     <div id="cVL" class="feed"></div>
+    <div id="cSL" class="feed" style="display:none"></div>
   </div>
 
   <!-- SHORTS -->
@@ -301,6 +339,10 @@
 
     // Telefon geri tuşu
     window.addEventListener('popstate', function(){
+      if(document.body.classList.contains('in-fs-landscape')){
+        toggleFullScreenLandscape();
+        return;
+      }
       if(gid("cV").style.display==="block") closeChan(false);
       else if(gid("wV").style.display==="block") closeW(false);
       else if(curNav === 'shorts') nav('home');
@@ -450,6 +492,39 @@
       isLoadingMore=false;
     }
 
+    // TÜRKÇE TARİH DÖNÜŞTÜRÜCÜ (İNGİLİZCE YAZILARI KALDIRIR)
+    function trDate(str, uploadedMs){
+      if(uploadedMs && uploadedMs > 0){
+        var diff = Date.now() - uploadedMs;
+        if(diff > 0){
+          var sec = Math.floor(diff / 1000);
+          var min = Math.floor(sec / 60);
+          var hrs = Math.floor(min / 60);
+          var days = Math.floor(hrs / 24);
+          var months = Math.floor(days / 30);
+          var years = Math.floor(days / 365);
+          if(sec < 60) return "az önce";
+          if(min < 60) return min + " dakika önce";
+          if(hrs < 24) return hrs + " saat önce";
+          if(days < 30) return days + " gün önce";
+          if(months < 12) return months + " ay önce";
+          return years + " yıl önce";
+        }
+      }
+      if(!str) return "";
+      return str
+        .replace(/Streamed\s+/gi, '')
+        .replace(/hours?\s+ago/gi, 'saat önce')
+        .replace(/days?\s+ago/gi, 'gün önce')
+        .replace(/minutes?\s+ago/gi, 'dakika önce')
+        .replace(/seconds?\s+ago/gi, 'saniye önce')
+        .replace(/weeks?\s+ago/gi, 'hafta önce')
+        .replace(/months?\s+ago/gi, 'ay önce')
+        .replace(/years?\s+ago/gi, 'yıl önce')
+        .replace(/yesterday/gi, 'dün')
+        .replace(/just now/gi, 'az önce');
+    }
+
     function renderFeed(c,items,append){
       if(!append) c.innerHTML="";
       if(!items||items.length===0){
@@ -459,24 +534,29 @@
       items.forEach(item=>appendCard(c,item));
     }
 
-    function appendCard(c,item){
+    function appendCard(c,item,isShortItem){
       var id=vid(item.url);
       if(!id) return;
       var t=item.title, ch=item.uploaderName||'', cu=item.uploaderUrl||'';
       var th=item.thumbnail||'';
       var av=item.uploaderAvatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(ch)}&background=f0f0f0&color=333`;
-      var vw=fmtV(item.views), dur=fmtD(item.duration), ud=item.uploadedDate||'';
+      var vw=fmtV(item.views), dur=fmtD(item.duration);
+      var ud=trDate(item.uploadedDate, item.uploaded);
+
+      var clickAct = isShortItem ? 
+        `openShortItem('${id}','${esc(t)}','${esc(ch)}','${av}')` :
+        `openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')`;
 
       var card=document.createElement("div");
       card.className="vc";
       card.innerHTML=`
-        <div class="tw" onclick="openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')">
+        <div class="tw" onclick="${clickAct}">
           <img src="${th}" loading="lazy">
           ${dur?`<div class="db">${dur}</div>`:''}
         </div>
         <div class="vd">
           <img class="ca" src="${av}" onclick="event.stopPropagation();openChan('${esc(ch)}','${cu}','${av}')">
-          <div class="mc" onclick="openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')">
+          <div class="mc" onclick="${clickAct}">
             <div class="vt">${t}</div>
             <div class="vs">${ch}${vw?' • '+vw+' görüntüleme':''}${ud?' • '+ud:''}</div>
           </div>
@@ -484,11 +564,11 @@
       c.appendChild(card);
     }
 
-    // 2 & 4. MADDE: VİDEO İZLEME (YATAY TAM EKRAN DESTEĞİ VE KARIŞIK ÖNERİLER)
+    // 2. VİDEO İZLEME VE BÜYÜT SİMGESİ İLE TAM EKRAN YATAY YAPMA
     function openW(id,t,ch,cu,av){
       history.pushState({v:'w'},'');
       curVC=ch;curVU=cu;curVA=av;
-      document.body.classList.add('in-watch'); // Yatayda otomatik tam ekran için işaretle
+      document.body.classList.add('in-watch');
       gid("wIf").src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
       gid("wTt").textContent=t;
       gid("wCh").textContent=ch;
@@ -496,12 +576,44 @@
       updSub("wSb",ch);
       gid("wV").style.display="block";
       gid("wV").scrollTop=0;
-      loadRel(); // Karışık videoları alttan getir
+      loadRel();
       checkOrientation();
+    }
+
+    // BÜYÜT SİMGESİNE TIKLANDIĞINDA TAM EKRAN VE YATAY YAPAR
+    function toggleFullScreenLandscape(){
+      var body = document.body;
+      var pw = gid("playerWrap");
+      var fsBtn = gid("pwFsBtn");
+      var isFs = body.classList.contains('in-fs-landscape');
+
+      if(isFs){
+        body.classList.remove('in-fs-landscape');
+        if(fsBtn) fsBtn.innerHTML = `<i class="fa-solid fa-expand"></i>`;
+        if(document.fullscreenElement && document.exitFullscreen){
+          document.exitFullscreen().catch(()=>{});
+        }
+        if(screen.orientation && screen.orientation.unlock){
+          screen.orientation.unlock();
+        }
+      } else {
+        body.classList.add('in-fs-landscape');
+        if(fsBtn) fsBtn.innerHTML = `<i class="fa-solid fa-compress"></i>`;
+        if(pw && pw.requestFullscreen){
+          pw.requestFullscreen().catch(()=>{});
+        }
+        if(screen.orientation && screen.orientation.lock){
+          screen.orientation.lock('landscape').catch(()=>{});
+        }
+      }
     }
 
     function closeW(pop){
       document.body.classList.remove('in-watch');
+      document.body.classList.remove('in-fs-landscape');
+      if(screen.orientation && screen.orientation.unlock){
+        screen.orientation.unlock();
+      }
       gid("wV").style.display="none";
       gid("wIf").src="";
       if(document.fullscreenElement){
@@ -570,7 +682,23 @@
       setTimeout(checkOrientation, 250);
     });
 
-    // 3. KANAL (EN YENİDEN ESKİYE DOĞRU SIRALANIR)
+    // 3. KANAL (VİDEOLAR VE SHORTS SEKMELERİ - EN YENİDEN ESKİYE)
+    function setChanTab(tab){
+      var bV = gid("ctV"), bS = gid("ctS");
+      var cV = gid("cVL"), cS = gid("cSL");
+      if(tab === 'videos'){
+        bV.classList.add("ac");
+        bS.classList.remove("ac");
+        cV.style.display = "block";
+        cS.style.display = "none";
+      } else {
+        bS.classList.add("ac");
+        bV.classList.remove("ac");
+        cS.style.display = "block";
+        cV.style.display = "none";
+      }
+    }
+
     async function openChan(n,u,a){
       history.pushState({v:'c'},'');
       curCN=n;curCU=u;curCA=a||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=065fd4&color=fff&size=128`;
@@ -578,28 +706,60 @@
       gid("cpTt").textContent=n;
       gid("cpAv").src=curCA;
       updSub("cpSb",n);
+      setChanTab('videos');
       gid("cV").style.display="block";
       gid("cV").scrollTop=0;
-      var l=gid("cVL");
-      l.innerHTML=`<div class="ld">Kanalın en yeni videoları yükleniyor...</div>`;
+
+      var vList = gid("cVL");
+      var sList = gid("cSL");
+      vList.innerHTML=`<div class="ld">Kanalın en yeni videoları yükleniyor...</div>`;
+      sList.innerHTML=`<div class="ld">Kanalın Shorts videoları yükleniyor...</div>`;
 
       try{
-        var r = await fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=videos`);
-        var d = await r.json();
-        var items = (d.items||[]).filter(i=>i.type==='stream');
+        var [rVideos, rShorts] = await Promise.all([
+          fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=all`).then(r=>r.json()).catch(()=>({items:[]})),
+          fetch(`${P}/search?q=${encodeURIComponent(n + " #shorts")}&filter=all`).then(r=>r.json()).catch(()=>({items:[]}))
+        ]);
 
-        // Bu kanala ait videoları filtrele
-        var chItems = items.filter(i => 
+        var allItems = (rVideos.items||[]).filter(i=>i.type==='stream');
+        var chItems = allItems.filter(i => 
           (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
           (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
         );
-        if(chItems.length < 3) chItems = items;
-
-        // EN YENİDEN ESKİYE DOĞRU SIRALA
+        if(chItems.length < 3) chItems = allItems;
         sortNewest(chItems);
+        renderFeed(vList, chItems, false);
 
-        renderFeed(l, chItems, false);
-      }catch(e){l.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
+        // Shorts videoları
+        var allShorts = (rShorts.items||[]).filter(i=>i.type==='stream' && (i.duration<=180 || (i.title||'').toLowerCase().includes('short')));
+        var chShorts = allShorts.filter(i => 
+          (i.uploaderName||'').toLowerCase().includes(n.toLowerCase()) || 
+          (n.toLowerCase().includes((i.uploaderName||'').toLowerCase()))
+        );
+        if(chShorts.length === 0){
+          chShorts = chItems.filter(i => i.duration > 0 && i.duration <= 180);
+        }
+        sortNewest(chShorts);
+
+        sList.innerHTML = "";
+        if(chShorts.length === 0){
+          sList.innerHTML = `<div class="ld">Bu kanalda Shorts videosu bulunamadı.</div>`;
+        } else {
+          chShorts.forEach(item => appendCard(sList, item, true));
+        }
+      }catch(e){
+        vList.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`;
+      }
+    }
+
+    function openShortItem(id, t, ch, av){
+      curSC = ch;
+      curSA = av;
+      sL = [{ url: '/watch?v=' + id, title: t, uploaderName: ch, uploaderAvatar: av }];
+      sI = 0;
+      closeChan(false);
+      nav('shorts');
+      dispS();
     }
     function closeChan(pop){
       gid("cV").style.display="none";
@@ -631,19 +791,95 @@
       });
     }
 
-    // 5. ARAMA (@HANDLE SINIRSIZ - KLAVYE ODAKLAMA DESTEĞİ)
+    // 5. ARAMA VE EN SON ARANANLAR GEÇMİŞİ
+    function getSearchHist(){
+      try{ return JSON.parse(localStorage.getItem('yt_srch_hist') || '[]'); }catch(e){ return []; }
+    }
+    function saveSearchQuery(q){
+      if(!q) return;
+      var h = getSearchHist();
+      h = h.filter(x => x.toLowerCase() !== q.toLowerCase());
+      h.unshift(q);
+      if(h.length > 12) h = h.slice(0, 12);
+      localStorage.setItem('yt_srch_hist', JSON.stringify(h));
+    }
+    function removeSearchQuery(q, e){
+      if(e) e.stopPropagation();
+      var h = getSearchHist().filter(x => x.toLowerCase() !== q.toLowerCase());
+      localStorage.setItem('yt_srch_hist', JSON.stringify(h));
+      renderSrchHist();
+    }
+    function pickSearch(q){
+      gid("srchI").value = q;
+      doSrch(q);
+    }
+    function renderSrchHist(){
+      var box = gid("srchHist");
+      if(!box) return;
+      var val = (gid("srchI").value || "").trim().toLowerCase();
+      var h = getSearchHist();
+      box.innerHTML = "";
+
+      if(h.length > 0){
+        var filtered = val ? h.filter(x => x.toLowerCase().includes(val)) : h;
+        if(filtered.length > 0){
+          var title = document.createElement("div");
+          title.className = "sh-title";
+          title.textContent = "Son Aramalar";
+          box.appendChild(title);
+
+          filtered.forEach(q => {
+            var row = document.createElement("div");
+            row.className = "sh-item";
+            row.onclick = () => pickSearch(q);
+            row.innerHTML = `
+              <div class="sh-left">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>${esc(q)}</span>
+              </div>
+              <button class="sh-del" onclick="removeSearchQuery('${esc(q)}', event)">&times;</button>
+            `;
+            box.appendChild(row);
+          });
+        }
+      }
+
+      // Önerilen aramalar
+      var recTitle = document.createElement("div");
+      recTitle.className = "sh-title";
+      recTitle.textContent = "Önerilen Aramalar";
+      box.appendChild(recTitle);
+
+      var recs = ["karadeniz türküleri", "nefis yemek tarifleri", "çiçek bakımı", "rize yaylalar", "huzur veren ilahiler"];
+      recs.forEach(q => {
+        var row = document.createElement("div");
+        row.className = "sh-item";
+        row.onclick = () => pickSearch(q);
+        row.innerHTML = `
+          <div class="sh-left">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>${esc(q)}</span>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+    }
+
     function openSrch(){
       var w = gid("srchW");
       var inp = gid("srchI");
       w.style.display = "flex";
+      renderSrchHist();
       setTimeout(function(){
         inp.focus();
         inp.select();
       }, 50);
     }
     function closeSrch(){gid("srchW").style.display="none"}
-    async function doSrch(){
-      var q=gid("srchI").value.trim();if(!q)return;
+    async function doSrch(customQ){
+      var q = (customQ || gid("srchI").value).trim();
+      if(!q) return;
+      saveSearchQuery(q);
       closeSrch();
       stopS();
       gid("sV").style.display="none";
@@ -777,10 +1013,11 @@
         poster.style.display = "block";
       }
 
-      gid("sIf").src = `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0&playsinline=1&controls=0&loop=1&playlist=${id}`;
+      // Optimize embed: modestbranding, iv_load_policy=3 (daha hızlı yüklenir)
+      gid("sIf").src = `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0&playsinline=1&controls=0&loop=1&playlist=${id}&modestbranding=1&iv_load_policy=3`;
       
       gid("sIf").onload = function(){
-        setTimeout(()=>{ poster.style.display = "none"; }, 500);
+        setTimeout(()=>{ poster.style.display = "none"; }, 350);
       };
 
       gid("sTt").textContent = it.title;
@@ -790,11 +1027,18 @@
       updSub("sSb", curSC);
       isShortPlaying = true;
 
-      if(sI >= sL.length - 2){
+      // Akıcılık için: Bir sonraki videonun görselini önceden hafızaya al
+      if(sL[sI + 1] && sL[sI + 1].thumbnail){
+        var preImg = new Image();
+        preImg.src = sL[sI + 1].thumbnail;
+      }
+
+      if(sI >= sL.length - 3){
         preloadShorts();
       }
     }
 
+    // ULTRA AKICI VE HIZLI GEÇİŞ (m.youtube.com GİBİ BEKLETMEDEN)
     function slideNext(){
       if(isShortTransitioning) return;
       if(sI >= sL.length - 1){
@@ -803,38 +1047,34 @@
       }
       isShortTransitioning = true;
       var wrap = gid("sWrapper");
-      wrap.style.transition = 'transform 0.22s ease-in';
-      wrap.style.transform = 'translateY(-100%)';
 
-      setTimeout(function(){
-        sI++;
-        dispS();
-        wrap.style.transition = 'none';
-        wrap.style.transform = 'translateY(100%)';
-        void wrap.offsetHeight;
-        wrap.style.transition = 'transform 0.22s ease-out';
-        wrap.style.transform = 'translateY(0)';
-        setTimeout(function(){ isShortTransitioning = false; }, 230);
-      }, 220);
+      // Anında sonraki videoya geç ve görseli göster
+      sI++;
+      dispS();
+
+      // GPU donanım hızlandırmalı yumuşak geçiş
+      wrap.style.transition = 'none';
+      wrap.style.transform = 'translate3d(0, 50px, 0)';
+      void wrap.offsetHeight;
+      wrap.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.8, 0.3, 1)';
+      wrap.style.transform = 'translate3d(0, 0, 0)';
+      setTimeout(function(){ isShortTransitioning = false; }, 170);
     }
 
     function slidePrev(){
       if(isShortTransitioning || sI <= 0) return;
       isShortTransitioning = true;
       var wrap = gid("sWrapper");
-      wrap.style.transition = 'transform 0.22s ease-in';
-      wrap.style.transform = 'translateY(100%)';
 
-      setTimeout(function(){
-        sI--;
-        dispS();
-        wrap.style.transition = 'none';
-        wrap.style.transform = 'translateY(-100%)';
-        void wrap.offsetHeight;
-        wrap.style.transition = 'transform 0.22s ease-out';
-        wrap.style.transform = 'translateY(0)';
-        setTimeout(function(){ isShortTransitioning = false; }, 230);
-      }, 220);
+      sI--;
+      dispS();
+
+      wrap.style.transition = 'none';
+      wrap.style.transform = 'translate3d(0, -50px, 0)';
+      void wrap.offsetHeight;
+      wrap.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.8, 0.3, 1)';
+      wrap.style.transform = 'translate3d(0, 0, 0)';
+      setTimeout(function(){ isShortTransitioning = false; }, 170);
     }
 
     function toggleShortPlay(){
@@ -872,7 +1112,7 @@
       gid("sPoster").src="";
     }
 
-    // MOBİL DOKUNMA VE KAYDIRMA (TOUCH GESTURES)
+    // MOBİL DOKUNMA VE KAYDIRMA (GPU DONANIM HIZLANDIRMALI)
     (function setupShortSwipe(){
       var touchStartY = 0, touchStartX = 0, currentDiffY = 0, touchStartTime = 0;
       var isDragging = false;
@@ -897,8 +1137,8 @@
           currentDiffY = currentDiffY * 0.3;
         }
 
-        var clamped = Math.max(-120, Math.min(120, currentDiffY));
-        wrap.style.transform = `translateY(${clamped}px)`;
+        var clamped = Math.max(-90, Math.min(90, currentDiffY));
+        wrap.style.transform = `translate3d(0, ${clamped}px, 0)`;
       }, { passive: true });
 
       touchEl.addEventListener('touchend', function(e){
@@ -909,15 +1149,15 @@
         var diffX = touchEndX - touchStartX;
         var timeElapsed = Date.now() - touchStartTime;
 
-        if(Math.abs(currentDiffY) < 40){
-          wrap.style.transition = 'transform 0.18s ease-out';
-          wrap.style.transform = 'translateY(0)';
+        if(Math.abs(currentDiffY) < 35){
+          wrap.style.transition = 'transform 0.14s ease-out';
+          wrap.style.transform = 'translate3d(0, 0, 0)';
         }
 
-        if(currentDiffY < -40 && Math.abs(currentDiffY) > Math.abs(diffX)){
+        if(currentDiffY < -35 && Math.abs(currentDiffY) > Math.abs(diffX)){
           slideNext();
         }
-        else if(currentDiffY > 40 && Math.abs(currentDiffY) > Math.abs(diffX)){
+        else if(currentDiffY > 35 && Math.abs(currentDiffY) > Math.abs(diffX)){
           slidePrev();
         }
         else if(Math.abs(currentDiffY) < 15 && Math.abs(diffX) < 15 && timeElapsed < 300){
@@ -935,8 +1175,8 @@
         if(!isMouseDown) return;
         isMouseDown = false;
         var diff = e.clientY - mStartY;
-        if(diff < -40) slideNext();
-        else if(diff > 40) slidePrev();
+        if(diff < -35) slideNext();
+        else if(diff > 35) slidePrev();
         else if(Math.abs(diff) < 10) toggleShortPlay();
       });
     })();
@@ -982,7 +1222,7 @@
       try{
         var targets = s.slice(0, 10);
         var promises = targets.map(ch =>
-          fetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=videos`)
+          fetch(`${P}/search?q=${encodeURIComponent(ch.name)}&filter=all`)
             .then(r => r.json())
             .then(d => {
               var streams = (d.items || []).filter(i => i.type === 'stream');
@@ -990,7 +1230,7 @@
                 (i.uploaderName||'').toLowerCase().includes(ch.name.toLowerCase()) || 
                 ch.name.toLowerCase().includes((i.uploaderName||'').toLowerCase())
               );
-              return matched.length > 0 ? matched.slice(0, 4) : streams.slice(0, 3);
+              return matched.length > 0 ? matched.slice(0, 6) : streams.slice(0, 4);
             })
             .catch(() => [])
         );
