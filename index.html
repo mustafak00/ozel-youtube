@@ -11,648 +11,516 @@
   <meta name="apple-mobile-web-app-title" content="YouTube">
   <meta name="application-name" content="YouTube">
   
-  <link rel="icon" type="image/png" sizes="192x192" href="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png">
-  <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png">
-  <link rel="manifest" href='data:application/manifest+json,{"name":"YouTube","short_name":"YouTube","start_url":".","display":"standalone","background_color":"%23ffffff","theme_color":"%23ffffff","icons":[{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png","sizes":"192x192","type":"image/png"}]}'>
+  <!-- YouTube Logosu (Ana Ekran İkonu) - Beyaz Arka Plan + Kırmızı Play -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"YouTube","short_name":"YouTube","start_url":".","display":"standalone","background_color":"%23ffffff","theme_color":"%23ffffff","icons":[{"src":"https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"}]}'>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #ffffff; color: #0f0f0f; padding-bottom: 56px; overflow-x: hidden; }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+    body{background:#fff;color:#0f0f0f;padding-bottom:56px;overflow-x:hidden}
 
     /* ÜST BAR */
-    .yt-header {
-      position: sticky; top: 0; z-index: 100; background: #ffffff;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 16px; border-bottom: 1px solid #e5e5e5;
-    }
-    .yt-logo { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.8px; color: #0f0f0f; }
-    .yt-logo i { color: #ff0000; font-size: 1.6rem; }
-    .yt-header-icons { display: flex; align-items: center; gap: 20px; font-size: 1.15rem; color: #0f0f0f; }
-    .profile-avatar { width: 28px; height: 28px; border-radius: 50%; background: #00796b; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+    .yt-h{position:sticky;top:0;z-index:100;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #e5e5e5}
+    .yt-logo{display:flex;align-items:center;gap:4px;font-weight:700;font-size:1.25rem;letter-spacing:-.8px;color:#0f0f0f}
+    .yt-logo i{color:#ff0000;font-size:1.6rem}
+    .hi{display:flex;align-items:center;gap:20px;font-size:1.15rem;color:#0f0f0f}
+    .pav{width:28px;height:28px;border-radius:50%;background:#00796b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:bold}
 
-    /* ARAMA ÇUBUĞU */
-    .search-bar-wrap {
-      display: none; position: fixed; top: 0; left: 0; right: 0;
-      background: #ffffff; padding: 8px 12px; z-index: 250;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); align-items: center; gap: 10px;
-    }
-    .search-bar-wrap input {
-      flex: 1; border: 1px solid #ccc; background: #f8f8f8;
-      border-radius: 20px; padding: 9px 16px; font-size: 0.95rem; outline: none;
-    }
-    .search-bar-wrap button { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #333; }
+    /* ARAMA */
+    .srch{display:none;position:fixed;top:0;left:0;right:0;background:#fff;padding:8px 12px;z-index:250;box-shadow:0 2px 6px rgba(0,0,0,.1);align-items:center;gap:10px}
+    .srch input{flex:1;border:1px solid #ccc;background:#f8f8f8;border-radius:20px;padding:9px 16px;font-size:.95rem;outline:none}
+    .srch button{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#333}
 
     /* VİDEO AKIŞI */
-    .feed { display: flex; flex-direction: column; gap: 16px; margin-top: 4px; }
-    .video-card { width: 100%; cursor: pointer; }
-    .thumb-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #e0e0e0; }
-    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .duration-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; }
-    
-    .video-details { display: flex; gap: 12px; padding: 12px 14px 6px 14px; }
-    .chan-avatar { width: 38px; height: 38px; border-radius: 50%; background: #eee; flex-shrink: 0; object-fit: cover; }
-    .meta-col { flex: 1; }
-    .video-title { font-size: 0.95rem; font-weight: 500; line-height: 1.35; color: #0f0f0f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
-    .video-subtext { font-size: 0.78rem; color: #606060; }
+    .feed{display:flex;flex-direction:column;gap:16px;margin-top:4px}
+    .vc{width:100%;cursor:pointer}
+    .tw{position:relative;width:100%;aspect-ratio:16/9;background:#e0e0e0}
+    .tw img{width:100%;height:100%;object-fit:cover}
+    .db{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);color:#fff;font-size:.72rem;font-weight:600;padding:2px 5px;border-radius:4px}
+    .vd{display:flex;gap:12px;padding:12px 14px 6px}
+    .ca{width:38px;height:38px;border-radius:50%;background:#eee;flex-shrink:0;object-fit:cover}
+    .mc{flex:1}
+    .vt{font-size:.95rem;font-weight:500;line-height:1.35;color:#0f0f0f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+    .vs{font-size:.78rem;color:#606060}
 
     /* İZLEME EKRANI */
-    .watch-view { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 52px; background: #ffffff; z-index: 200; overflow-y: auto; }
-    .player-wrap { width: 100%; aspect-ratio: 16/9; background: #000; position: sticky; top: 0; z-index: 201; }
-    .player-wrap iframe { width: 100%; height: 100%; border: none; }
-    .watch-info { padding: 14px; border-bottom: 1px solid #e5e5e5; }
-    .watch-title { font-size: 1.05rem; font-weight: 600; line-height: 1.35; color: #0f0f0f; }
-    .watch-meta { font-size: 0.78rem; color: #606060; margin-top: 4px; }
-    
-    .watch-channel-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
-    .watch-channel-left { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .watch-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-    .watch-channel-name { font-size: 0.92rem; font-weight: 600; }
-    .btn-subscribe { background: #0f0f0f; color: #ffffff; border: none; border-radius: 20px; padding: 8px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-    .btn-subscribe.subscribed { background: #f2f2f2; color: #0f0f0f; }
+    .wv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:200;overflow-y:auto}
+    .pw{width:100%;aspect-ratio:16/9;background:#000;position:sticky;top:0;z-index:201}
+    .pw iframe{width:100%;height:100%;border:none}
+    .wi{padding:14px;border-bottom:1px solid #e5e5e5}
+    .wtt{font-size:1.05rem;font-weight:600;line-height:1.35;color:#0f0f0f}
+    .wm{font-size:.78rem;color:#606060;margin-top:4px}
+    .wcr{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+    .wcl{display:flex;align-items:center;gap:10px;cursor:pointer}
+    .wav{width:40px;height:40px;border-radius:50%;object-fit:cover}
+    .wcn{font-size:.92rem;font-weight:600}
+    .bsub{background:#0f0f0f;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer}
+    .bsub.sd{background:#f2f2f2;color:#0f0f0f}
 
-    /* KANAL PROFİL SAYFASI */
-    .channel-view { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 52px; background: #ffffff; z-index: 210; overflow-y: auto; }
-    .channel-header { padding: 24px 16px; text-align: center; border-bottom: 1px solid #e5e5e5; }
-    .channel-header img { width: 75px; height: 75px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; }
-    .channel-header h2 { font-size: 1.25rem; }
+    /* KANAL SAYFASI */
+    .cv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#fff;z-index:210;overflow-y:auto}
+    .ch{padding:24px 16px;text-align:center;border-bottom:1px solid #e5e5e5}
+    .ch img{width:75px;height:75px;border-radius:50%;margin-bottom:10px;object-fit:cover}
+    .ch h2{font-size:1.25rem}
 
-    /* SHORTS EKRANI */
-    .shorts-view {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 52px;
-      background: #000; z-index: 150; overflow: hidden;
-    }
-    .short-frame-wrap { width: 100%; height: 100%; position: relative; }
-    .short-frame-wrap iframe { width: 100%; height: 100%; border: none; }
-    
-    .short-overlay-info {
-      position: absolute; bottom: 85px; left: 16px; right: 70px; z-index: 10;
-      color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none;
-    }
-    .short-chan-line { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; pointer-events: auto; }
-    .short-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
-    .short-chan-name { font-weight: bold; font-size: 0.95rem; }
-    .short-desc { font-size: 0.88rem; line-height: 1.3; }
-
-    .short-nav-controls {
-      position: absolute; bottom: 90px; right: 12px; z-index: 10;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    .short-circle-btn {
-      width: 46px; height: 46px; border-radius: 50%; background: rgba(30,30,30,0.7);
-      color: #fff; border: none; display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; cursor: pointer; backdrop-filter: blur(4px);
-    }
+    /* SHORTS */
+    .sv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#000;z-index:150;overflow:hidden}
+    .sfw{width:100%;height:100%;position:relative}
+    .sfw iframe{width:100%;height:100%;border:none}
+    .soi{position:absolute;bottom:85px;left:16px;right:70px;z-index:10;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8);pointer-events:none}
+    .scl{display:flex;align-items:center;gap:8px;margin-bottom:8px;pointer-events:auto}
+    .sav{width:34px;height:34px;border-radius:50%;object-fit:cover}
+    .scn{font-weight:bold;font-size:.95rem}
+    .sde{font-size:.88rem;line-height:1.3}
+    .snc{position:absolute;bottom:90px;right:12px;z-index:10;display:flex;flex-direction:column;gap:14px}
+    .scb{width:46px;height:46px;border-radius:50%;background:rgba(30,30,30,.7);color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;backdrop-filter:blur(4px)}
 
     /* ABONELİKLER */
-    .subs-avatar-bar { display: flex; gap: 14px; padding: 12px 16px; overflow-x: auto; border-bottom: 1px solid #e5e5e5; scrollbar-width: none; }
-    .subs-avatar-bar::-webkit-scrollbar { display: none; }
-    .sub-avatar-item { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 62px; cursor: pointer; }
-    .sub-avatar-item img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #065fd4; }
-    .sub-avatar-item span { font-size: 0.72rem; color: #606060; max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sab{display:flex;gap:14px;padding:12px 16px;overflow-x:auto;border-bottom:1px solid #e5e5e5;scrollbar-width:none}
+    .sab::-webkit-scrollbar{display:none}
+    .sai{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:62px;cursor:pointer}
+    .sai img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #065fd4}
+    .sai span{font-size:.72rem;color:#606060;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
     /* ALT MENÜ */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
-      background: #ffffff; border-top: 1px solid #e5e5e5;
-      display: flex; justify-content: space-around; align-items: center; z-index: 300;
-    }
-    .nav-btn { background: none; border: none; color: #606060; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.65rem; cursor: pointer; width: 33%; }
-    .nav-btn i { font-size: 1.25rem; }
-    .nav-btn.active { color: #0f0f0f; font-weight: bold; }
+    .bn{position:fixed;bottom:0;left:0;right:0;height:52px;background:#fff;border-top:1px solid #e5e5e5;display:flex;justify-content:space-around;align-items:center;z-index:300}
+    .nb{background:none;border:none;color:#606060;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.65rem;cursor:pointer;width:33%}
+    .nb i{font-size:1.25rem}
+    .nb.ac{color:#0f0f0f;font-weight:bold}
 
     /* ARAMA KANAL KARTI */
-    .search-channel-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eee; background: #fafafa; }
-    .search-chan-info { display: flex; align-items: center; gap: 14px; cursor: pointer; }
-    .search-chan-info img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+    .scc{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee;background:#fafafa}
+    .sci{display:flex;align-items:center;gap:14px;cursor:pointer}
+    .sci img{width:56px;height:56px;border-radius:50%;object-fit:cover}
 
-    .loading { text-align: center; padding: 40px; color: #888; font-size: 0.9rem; }
+    /* YÜKLENME GÖSTERGESİ */
+    .ld{text-align:center;padding:40px;color:#888;font-size:.9rem}
+    .ldm{text-align:center;padding:20px;color:#888;font-size:.85rem}
   </style>
 </head>
 <body>
 
   <!-- ÜST BAR -->
-  <header class="yt-header" id="mainHeader">
-    <div class="yt-logo">
-      <i class="fa-brands fa-youtube"></i>
-      <span>YouTube</span>
-    </div>
-    <div class="yt-header-icons">
+  <header class="yt-h">
+    <div class="yt-logo"><i class="fa-brands fa-youtube"></i><span>YouTube</span></div>
+    <div class="hi">
       <i class="fa-solid fa-tower-broadcast"></i>
       <i class="fa-regular fa-bell"></i>
-      <i class="fa-solid fa-magnifying-glass" onclick="openSearch()"></i>
-      <div class="profile-avatar">Ö</div>
+      <i class="fa-solid fa-magnifying-glass" onclick="openSrch()"></i>
+      <div class="pav">Ö</div>
     </div>
   </header>
 
-  <!-- ARAMA ALANI -->
-  <div class="search-bar-wrap" id="searchWrap">
-    <button onclick="closeSearch()"><i class="fa-solid fa-arrow-left"></i></button>
-    <input type="text" id="searchInput" placeholder="Örn: @okankarali veya video..." onkeydown="if(event.key==='Enter') executeSearch()">
-    <button onclick="executeSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+  <!-- ARAMA -->
+  <div class="srch" id="srchW">
+    <button onclick="closeSrch()"><i class="fa-solid fa-arrow-left"></i></button>
+    <input type="text" id="srchI" placeholder="@kanal veya video ara..." onkeydown="if(event.key==='Enter') doSrch()">
+    <button onclick="doSrch()"><i class="fa-solid fa-magnifying-glass"></i></button>
   </div>
 
-  <div id="subsBar" class="subs-avatar-bar" style="display: none;"></div>
+  <div id="subBar" class="sab" style="display:none"></div>
 
-  <!-- ANA SAYFA VİDEO LİSTESİ -->
-  <main id="videoList" class="feed"></main>
+  <!-- ANA SAYFA -->
+  <main id="vList" class="feed"></main>
 
-  <!-- İZLEME EKRANI -->
-  <div id="watchView" class="watch-view">
-    <div class="player-wrap">
-      <iframe id="watchIframe" allowfullscreen allow="autoplay"></iframe>
-    </div>
-    <div class="watch-info">
-      <div id="watchTitle" class="watch-title"></div>
-      <div class="watch-meta" id="watchMeta">İzleniyor</div>
-      
-      <div class="watch-channel-row">
-        <div class="watch-channel-left" onclick="openChannelPage(currentVideoChannel, currentVideoChanUrl, currentVideoAvatar)">
-          <img id="watchAvatar" class="watch-avatar" src="">
-          <div class="watch-channel-name" id="watchChannel"></div>
+  <!-- İZLEME -->
+  <div id="wV" class="wv">
+    <div class="pw"><iframe id="wIf" allowfullscreen allow="autoplay"></iframe></div>
+    <div class="wi">
+      <div id="wTt" class="wtt"></div>
+      <div class="wm" id="wMt">İzleniyor</div>
+      <div class="wcr">
+        <div class="wcl" onclick="openChan(curVC,curVU,curVA)">
+          <img id="wAv" class="wav" src="">
+          <div class="wcn" id="wCh"></div>
         </div>
-        <button id="watchSubBtn" class="btn-subscribe" onclick="toggleSub(currentVideoChannel, currentVideoChanUrl, currentVideoAvatar)">Abone Ol</button>
+        <button id="wSb" class="bsub" onclick="togSub(curVC,curVU,curVA)">Abone Ol</button>
       </div>
     </div>
-
-    <div style="font-weight: bold; padding: 12px 14px 4px 14px; font-size: 0.95rem;">Sıradaki Videolar</div>
-    <div id="relatedList" class="feed"></div>
+    <div style="font-weight:bold;padding:12px 14px 4px;font-size:.95rem">Sıradaki Videolar</div>
+    <div id="relL" class="feed"></div>
   </div>
 
-  <!-- KANAL DETAY SAYFASI -->
-  <div id="channelView" class="channel-view">
-    <div style="padding: 12px 14px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px;">
-      <button onclick="closeChannelPage()" style="background:none; border:none; font-size:1.2rem;"><i class="fa-solid fa-arrow-left"></i></button>
-      <span style="font-weight: 600;" id="chanPageTitle">Kanal</span>
+  <!-- KANAL -->
+  <div id="cV" class="cv">
+    <div style="padding:12px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:15px">
+      <button onclick="closeChan()" style="background:none;border:none;font-size:1.2rem"><i class="fa-solid fa-arrow-left"></i></button>
+      <span style="font-weight:600" id="cpTt">Kanal</span>
     </div>
-    <div class="channel-header">
-      <img id="chanPageAvatar" src="">
-      <h2 id="chanPageName"></h2>
-      <div style="margin: 12px 0;">
-        <button id="chanPageSubBtn" class="btn-subscribe" onclick="toggleSub(currentViewingChannel, currentViewingChanUrl, currentViewingAvatar)">Abone Ol</button>
-      </div>
+    <div class="ch">
+      <img id="cpAv" src="">
+      <h2 id="cpNm"></h2>
+      <div style="margin:12px 0"><button id="cpSb" class="bsub" onclick="togSub(curCN,curCU,curCA)">Abone Ol</button></div>
     </div>
-    <div style="font-weight: bold; padding: 12px 14px; font-size: 0.95rem;">Kanal Videoları</div>
-    <div id="channelVideosList" class="feed"></div>
+    <div style="font-weight:bold;padding:12px 14px;font-size:.95rem">Kanal Videoları</div>
+    <div id="cVL" class="feed"></div>
   </div>
 
-  <!-- SHORTS EKRANI -->
-  <div id="shortsView" class="shorts-view">
-    <div class="short-frame-wrap">
-      <iframe id="shortIframe" allowfullscreen allow="autoplay"></iframe>
-      <div class="short-overlay-info">
-        <div class="short-chan-line">
-          <img id="shortAvatar" class="short-avatar" src="">
-          <span id="shortChannel" class="short-chan-name"></span>
-          <button id="shortSubBtn" class="btn-subscribe" style="padding:4px 10px; font-size:0.75rem;" onclick="toggleSub(currentShortChannel, '', currentShortAvatar)">Abone Ol</button>
+  <!-- SHORTS -->
+  <div id="sV" class="sv">
+    <div class="sfw">
+      <iframe id="sIf" allowfullscreen allow="autoplay"></iframe>
+      <div class="soi">
+        <div class="scl">
+          <img id="sAv" class="sav" src="">
+          <span id="sCh" class="scn"></span>
+          <button id="sSb" class="bsub" style="padding:4px 10px;font-size:.75rem" onclick="togSub(curSC,'',curSA)">Abone Ol</button>
         </div>
-        <div id="shortTitle" class="short-desc"></div>
+        <div id="sTt" class="sde"></div>
       </div>
-      <div class="short-nav-controls">
-        <button class="short-circle-btn" onclick="nextShort()"><i class="fa-solid fa-chevron-down"></i></button>
-        <button class="short-circle-btn" onclick="prevShort()"><i class="fa-solid fa-chevron-up"></i></button>
+      <div class="snc">
+        <button class="scb" onclick="nxtS()"><i class="fa-solid fa-chevron-down"></i></button>
+        <button class="scb" onclick="prvS()"><i class="fa-solid fa-chevron-up"></i></button>
       </div>
     </div>
   </div>
 
   <!-- ALT MENÜ -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="btnHome" onclick="switchNav('home')">
-      <i class="fa-solid fa-house"></i>
-      <span>Ana Sayfa</span>
-    </button>
-    <button class="nav-btn" id="btnShorts" onclick="switchNav('shorts')">
-      <i class="fa-solid fa-bolt"></i>
-      <span>Shorts</span>
-    </button>
-    <button class="nav-btn" id="btnSubs" onclick="switchNav('subs')">
-      <i class="fa-brands fa-youtube"></i>
-      <span>Abonelikler</span>
-    </button>
+  <nav class="bn">
+    <button class="nb ac" id="bH" onclick="nav('home')"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
+    <button class="nb" id="bS" onclick="nav('shorts')"><i class="fa-solid fa-bolt"></i><span>Shorts</span></button>
+    <button class="nb" id="bA" onclick="nav('subs')"><i class="fa-brands fa-youtube"></i><span>Abonelikler</span></button>
   </nav>
 
   <script>
-    // AÇIK KAYNAK VE KOTASIZ PIPED API MOTORU (API KEY GEREKTİRMEZ!)
-    const PIPED_API = "https://api.piped.private.coffee";
-    
-    const ALLOWED_KEYWORDS = [
-      "karadeniz şarkıları", "rize yaylaları", "çiçek bakımı", 
-      "huzur veren ilahiler", "nefis yemek tarifleri", "karadeniz türküsü"
-    ];
+    // PIPED API - SINIRSIZ ve API KEY GEREKTİRMEZ
+    const P = "https://api.piped.private.coffee";
+    const KW = ["karadeniz şarkıları","rize yaylalar","çiçek bakımı","huzur veren ilahiler","nefis yemek tarifleri","karadeniz türküsü","yemek tarifleri","çiçek çeşitleri"];
 
-    let currentNav = 'home';
-    let currentVideoChannel = '', currentVideoChanUrl = '', currentVideoAvatar = '';
-    let currentViewingChannel = '', currentViewingChanUrl = '', currentViewingAvatar = '';
-    let currentShortChannel = '', currentShortAvatar = '';
+    let curNav='home', curVC='', curVU='', curVA='';
+    let curCN='', curCU='', curCA='';
+    let curSC='', curSA='';
+    let sL=[], sI=0;
 
-    let shortsList = [];
-    let currentShortIndex = 0;
+    // SONSUZ KAYDIRMA DEĞİŞKENLERİ
+    let nextPageToken = null;
+    let lastQuery = '';
+    let isLoadingMore = false;
+    let currentFeedTarget = 'vList';
 
-    // Telefon Geri Tuşu
-    window.addEventListener('popstate', function() {
-      if (document.getElementById("channelView").style.display === "block") {
-        closeChannelPage(false);
-      } else if (document.getElementById("watchView").style.display === "block") {
-        closeWatch(false);
-      } else if (document.getElementById("searchWrap").style.display === "flex") {
-        closeSearch();
+    // Telefon geri tuşu
+    window.addEventListener('popstate', function(){
+      if(gid("cV").style.display==="block") closeChan(false);
+      else if(gid("wV").style.display==="block") closeW(false);
+      else if(gid("srchW").style.display==="flex") closeSrch();
+    });
+
+    // SONSUZ KAYDIRMA - Sayfa dibine gelince yeni video yükle
+    window.addEventListener('scroll', function(){
+      if(isLoadingMore || !nextPageToken) return;
+      if(curNav !== 'home' && curNav !== 'search') return;
+      if((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 600){
+        loadMore();
       }
     });
 
-    function getSubs() {
-      return JSON.parse(localStorage.getItem('yt_subs_v2') || '[]');
+    function gid(id){return document.getElementById(id)}
+    function getSubs(){return JSON.parse(localStorage.getItem('yt_s3')||'[]')}
+    function saveSubs(s){localStorage.setItem('yt_s3',JSON.stringify(s))}
+    function vid(u){if(!u)return'';if(u.includes('v='))return u.split('v=')[1].split('&')[0];return u.replace('/watch?v=','')}
+    function esc(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+    function fmtD(s){if(!s||s<0)return'';var m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc}
+    function fmtV(v){if(!v||v<0)return'';if(v>=1e6)return Math.floor(v/1e6)+'M';if(v>=1e3)return Math.floor(v/1e3)+'B';return v+''}
+
+    // 1. ANA SAYFA (SONSUZ KAYDIRMA DESTEKLİ)
+    async function loadHome(){
+      var f=gid("vList");
+      f.innerHTML=`<div class="ld">Videolar yükleniyor...</div>`;
+      nextPageToken=null;
+      lastQuery=KW[Math.floor(Math.random()*KW.length)];
+      currentFeedTarget='vList';
+
+      try{
+        var r=await fetch(`${P}/search?q=${encodeURIComponent(lastQuery)}&filter=videos`);
+        var d=await r.json();
+        var items=(d.items||[]).filter(i=>i.type==='stream');
+        items.sort(()=>0.5-Math.random());
+        nextPageToken=d.nextpage||null;
+        renderFeed(f,items,false);
+      }catch(e){f.innerHTML=`<div class="ld">Bağlantı hatası. Tekrar deneyin.</div>`}
     }
 
-    function saveSubs(subs) {
-      localStorage.setItem('yt_subs_v2', JSON.stringify(subs));
-    }
+    // SONSUZ KAYDIRMA: DAHA FAZLA VİDEO YÜKLE
+    async function loadMore(){
+      if(isLoadingMore||!nextPageToken) return;
+      isLoadingMore=true;
 
-    function extractVideoId(url) {
-      if (!url) return '';
-      if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
-      if (url.startsWith('/watch?v=')) return url.replace('/watch?v=', '');
-      return url;
-    }
+      var f=gid(currentFeedTarget);
+      // "Daha fazla yükleniyor..." göstergesi ekle
+      var ldDiv=document.createElement('div');
+      ldDiv.className='ldm';
+      ldDiv.id='loadingMore';
+      ldDiv.textContent='Daha fazla video yükleniyor...';
+      f.appendChild(ldDiv);
 
-    // 1. ANA SAYFA KARIŞIK AKIŞI (KOTASIZ VE SINIRSIZ)
-    async function loadHomeFeed() {
-      const feed = document.getElementById("videoList");
-      feed.innerHTML = `<div class="loading">Videolar hazırlanıyor...</div>`;
+      try{
+        var r=await fetch(`${P}/nextpage/search?q=${encodeURIComponent(lastQuery)}&filter=videos&nextpage=${encodeURIComponent(nextPageToken)}`);
+        var d=await r.json();
+        var items=(d.items||[]).filter(i=>i.type==='stream');
+        nextPageToken=d.nextpage||null;
 
-      // İzinli konulardan rastgele 2 konu seçip birleştir
-      const shuffled = [...ALLOWED_KEYWORDS].sort(() => 0.5 - Math.random());
-      const query = shuffled[0];
+        // Yükleniyor göstergesini kaldır
+        var lm=gid('loadingMore');
+        if(lm) lm.remove();
 
-      try {
-        const res = await fetch(`${PIPED_API}/search?q=${encodeURIComponent(query)}&filter=all`);
-        const data = await res.json();
-        
-        let streams = (data.items || []).filter(item => item.type === 'stream');
-        streams.sort(() => 0.5 - Math.random());
-        renderFeed(feed, streams);
-      } catch (e) {
-        feed.innerHTML = `<div class="loading" style="color:red;">Bağlantı hatası oluştu, lütfen tekrar deneyin.</div>`;
+        // Yeni videoları mevcut listenin sonuna ekle
+        items.forEach(item=>appendCard(f,item));
+      }catch(e){
+        var lm=gid('loadingMore');
+        if(lm) lm.remove();
       }
+      isLoadingMore=false;
     }
 
-    function renderFeed(container, items) {
-      container.innerHTML = "";
-      if (!items || items.length === 0) {
-        container.innerHTML = `<div class="loading">Video bulunamadı.</div>`;
+    // Video kartı oluştur
+    function renderFeed(c,items,append){
+      if(!append) c.innerHTML="";
+      if(!items||items.length===0){
+        if(!append) c.innerHTML=`<div class="ld">Video bulunamadı.</div>`;
         return;
       }
-
-      items.forEach(item => {
-        const videoId = extractVideoId(item.url);
-        if (!videoId) return;
-
-        const title = item.title;
-        const channel = item.uploaderName || '';
-        const chanUrl = item.uploaderUrl || '';
-        const thumb = item.thumbnail;
-        const avatar = item.uploaderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(channel)}&background=f0f0f0&color=333`;
-        const views = item.views ? `${Math.floor(item.views / 1000)} B görüntüleme` : '';
-
-        const card = document.createElement("div");
-        card.className = "video-card";
-        card.innerHTML = `
-          <div class="thumb-wrap" onclick="openWatch('${videoId}', '${escapeQuotes(title)}', '${escapeQuotes(channel)}', '${chanUrl}', '${avatar}')">
-            <img src="${thumb}" loading="lazy">
-            <div class="duration-badge">${formatDuration(item.duration)}</div>
-          </div>
-          <div class="video-details">
-            <img class="chan-avatar" src="${avatar}" onclick="openChannelPage('${escapeQuotes(channel)}', '${chanUrl}', '${avatar}')">
-            <div class="meta-col" onclick="openWatch('${videoId}', '${escapeQuotes(title)}', '${escapeQuotes(channel)}', '${chanUrl}', '${avatar}')">
-              <div class="video-title">${title}</div>
-              <div class="video-subtext">${channel} • ${views}</div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
+      items.forEach(item=>appendCard(c,item));
     }
 
-    function formatDuration(sec) {
-      if (!sec) return "Video";
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
+    function appendCard(c,item){
+      var id=vid(item.url);
+      if(!id) return;
+      var t=item.title, ch=item.uploaderName||'', cu=item.uploaderUrl||'';
+      var th=item.thumbnail||'';
+      var av=item.uploaderAvatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(ch)}&background=f0f0f0&color=333`;
+      var vw=fmtV(item.views), dur=fmtD(item.duration), ud=item.uploadedDate||'';
 
-    function escapeQuotes(str) {
-      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      var card=document.createElement("div");
+      card.className="vc";
+      card.innerHTML=`
+        <div class="tw" onclick="openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')">
+          <img src="${th}" loading="lazy">
+          ${dur?`<div class="db">${dur}</div>`:''}
+        </div>
+        <div class="vd">
+          <img class="ca" src="${av}" onclick="event.stopPropagation();openChan('${esc(ch)}','${cu}','${av}')">
+          <div class="mc" onclick="openW('${id}','${esc(t)}','${esc(ch)}','${cu}','${av}')">
+            <div class="vt">${t}</div>
+            <div class="vs">${ch}${vw?' • '+vw+' görüntüleme':''}${ud?' • '+ud:''}</div>
+          </div>
+        </div>`;
+      c.appendChild(card);
     }
 
     // 2. VİDEO İZLEME
-    function openWatch(videoId, title, channel, chanUrl, avatar) {
-      history.pushState({ view: 'watch' }, '');
-      currentVideoChannel = channel;
-      currentVideoChanUrl = chanUrl;
-      currentVideoAvatar = avatar;
-
-      const watch = document.getElementById("watchView");
-      const iframe = document.getElementById("watchIframe");
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-
-      document.getElementById("watchTitle").textContent = title;
-      document.getElementById("watchChannel").textContent = channel;
-      document.getElementById("watchAvatar").src = avatar;
-
-      updateSubButtonUI("watchSubBtn", channel);
-
-      watch.style.display = "block";
-      watch.scrollTop = 0;
-
-      loadRelatedVideos(channel);
+    function openW(id,t,ch,cu,av){
+      history.pushState({v:'w'},'');
+      curVC=ch;curVU=cu;curVA=av;
+      gid("wIf").src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+      gid("wTt").textContent=t;
+      gid("wCh").textContent=ch;
+      gid("wAv").src=av;
+      updSub("wSb",ch);
+      gid("wV").style.display="block";
+      gid("wV").scrollTop=0;
+      loadRel(ch);
+    }
+    function closeW(pop){
+      gid("wV").style.display="none";
+      gid("wIf").src="";
+      if(pop!==false&&history.state&&history.state.v==='w') history.back();
+    }
+    async function loadRel(ch){
+      var r=gid("relL");
+      r.innerHTML=`<div class="ld">Sıradaki videolar...</div>`;
+      try{
+        var q=ch||'karadeniz';
+        var res=await fetch(`${P}/search?q=${encodeURIComponent(q)}&filter=videos`);
+        var d=await res.json();
+        var s=(d.items||[]).filter(i=>i.type==='stream').slice(0,8);
+        renderFeed(r,s,false);
+      }catch(e){}
     }
 
-    function closeWatch(shouldPop = true) {
-      document.getElementById("watchView").style.display = "none";
-      document.getElementById("watchIframe").src = "";
-      if (shouldPop && history.state && history.state.view === 'watch') {
-        history.back();
+    // 3. KANAL
+    async function openChan(n,u,a){
+      history.pushState({v:'c'},'');
+      curCN=n;curCU=u;curCA=a||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=065fd4&color=fff&size=128`;
+      gid("cpNm").textContent=n;
+      gid("cpTt").textContent=n;
+      gid("cpAv").src=curCA;
+      updSub("cpSb",n);
+      gid("cV").style.display="block";
+      gid("cV").scrollTop=0;
+      var l=gid("cVL");
+      l.innerHTML=`<div class="ld">Kanalın videoları yükleniyor...</div>`;
+
+      if(u&&u.includes('/channel/')){
+        var cid=u.replace('/channel/','');
+        try{
+          var r=await fetch(`${P}/channel/${cid}`);
+          var d=await r.json();
+          if(d.avatarUrl) gid("cpAv").src=d.avatarUrl;
+          if(d.relatedStreams&&d.relatedStreams.length>0){renderFeed(l,d.relatedStreams,false);return;}
+        }catch(e){}
       }
+      try{
+        var r2=await fetch(`${P}/search?q=${encodeURIComponent(n)}&filter=videos`);
+        var d2=await r2.json();
+        renderFeed(l,(d2.items||[]).filter(i=>i.type==='stream'),false);
+      }catch(e){l.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
+    }
+    function closeChan(pop){
+      gid("cV").style.display="none";
+      if(pop!==false&&history.state&&history.state.v==='c') history.back();
     }
 
-    async function loadRelatedVideos(channel) {
-      const rel = document.getElementById("relatedList");
-      try {
-        const res = await fetch(`${PIPED_API}/search?q=${encodeURIComponent(channel || 'karadeniz')}&filter=all`);
-        const data = await res.json();
-        const streams = (data.items || []).filter(item => item.type === 'stream').slice(0, 8);
-        renderFeed(rel, streams);
-      } catch (e) {}
+    // 4. ABONELİK
+    function togSub(n,u,a){
+      if(!n) return;
+      var s=getSubs(),ex=s.find(x=>x.name===n);
+      if(ex){s=s.filter(x=>x.name!==n);saveSubs(s);alert('"'+n+'" aboneliğinden çıkıldı.')}
+      else{s.push({name:n,url:u||'',avatar:a||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=065fd4&color=fff`});saveSubs(s);alert('"'+n+'" kanalına abone olundu!')}
+      updSub("wSb",n);updSub("cpSb",n);updSub("sSb",n);renderSBar();
     }
-
-    // 3. KANAL PROFİLİ VE KANAL VİDEOLARI
-    async function openChannelPage(channelName, chanUrl, avatarUrl) {
-      history.pushState({ view: 'channel' }, '');
-      currentViewingChannel = channelName;
-      currentViewingChanUrl = chanUrl;
-      currentViewingAvatar = avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(channelName)}&background=065fd4&color=fff&size=128`;
-
-      const page = document.getElementById("channelView");
-      document.getElementById("chanPageName").textContent = channelName;
-      document.getElementById("chanPageTitle").textContent = channelName;
-      document.getElementById("chanPageAvatar").src = currentViewingAvatar;
-
-      updateSubButtonUI("chanPageSubBtn", channelName);
-      page.style.display = "block";
-      page.scrollTop = 0;
-
-      const list = document.getElementById("channelVideosList");
-      list.innerHTML = `<div class="loading">Kanalın videoları getiriliyor...</div>`;
-
-      // Kanal ID varsa (/channel/UC...) doğrudan kanal endpointinden çek
-      if (chanUrl && chanUrl.includes('/channel/')) {
-        const chanId = chanUrl.replace('/channel/', '');
-        try {
-          const res = await fetch(`${PIPED_API}/channel/${chanId}`);
-          const data = await res.json();
-          if (data.relatedStreams && data.relatedStreams.length > 0) {
-            renderFeed(list, data.relatedStreams);
-            return;
-          }
-        } catch (e) {}
-      }
-
-      // Yoksa isimle ara
-      fetch(`${PIPED_API}/search?q=${encodeURIComponent(channelName)}&filter=all`)
-        .then(r => r.json())
-        .then(d => {
-          const streams = (d.items || []).filter(i => i.type === 'stream');
-          renderFeed(list, streams);
-        })
-        .catch(() => { list.innerHTML = `<div class="loading">Videolar yüklenemedi.</div>`; });
+    function updSub(id,n){
+      var b=gid(id);if(!b)return;var s=getSubs();
+      if(s.some(x=>x.name===n)){b.textContent="Abone Olundu";b.classList.add("sd")}
+      else{b.textContent="Abone Ol";b.classList.remove("sd")}
     }
-
-    function closeChannelPage(shouldPop = true) {
-      document.getElementById("channelView").style.display = "none";
-      if (shouldPop && history.state && history.state.view === 'channel') {
-        history.back();
-      }
-    }
-
-    function toggleSub(channelName, chanUrl, avatarUrl) {
-      if (!channelName) return;
-      let subs = getSubs();
-      const existing = subs.find(s => s.name === channelName);
-
-      if (existing) {
-        subs = subs.filter(s => s.name !== channelName);
-        saveSubs(subs);
-        alert(`"${channelName}" aboneliğinden çıkıldı.`);
-      } else {
-        subs.push({
-          name: channelName,
-          url: chanUrl || '',
-          avatar: avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(channelName)}&background=065fd4&color=fff`
-        });
-        saveSubs(subs);
-        alert(`"${channelName}" kanalına abone olundu!`);
-      }
-
-      updateSubButtonUI("watchSubBtn", channelName);
-      updateSubButtonUI("chanPageSubBtn", channelName);
-      updateSubButtonUI("shortSubBtn", channelName);
-      renderSubsBar();
-    }
-
-    function updateSubButtonUI(btnId, channelName) {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-      const subs = getSubs();
-      if (subs.some(s => s.name === channelName)) {
-        btn.textContent = "Abone Olundu";
-        btn.classList.add("subscribed");
-      } else {
-        btn.textContent = "Abone Ol";
-        btn.classList.remove("subscribed");
-      }
-    }
-
-    function renderSubsBar() {
-      const bar = document.getElementById("subsBar");
-      const subs = getSubs();
-      bar.innerHTML = "";
-      if (subs.length === 0) {
-        bar.style.display = "none";
-        return;
-      }
-      bar.style.display = "flex";
-      subs.forEach(s => {
-        const item = document.createElement("div");
-        item.className = "sub-avatar-item";
-        item.onclick = () => openChannelPage(s.name, s.url, s.avatar);
-        item.innerHTML = `
-          <img src="${s.avatar}">
-          <span>${s.name}</span>
-        `;
-        bar.appendChild(item);
+    function renderSBar(){
+      var b=gid("subBar"),s=getSubs();b.innerHTML="";
+      if(!s.length){b.style.display="none";return}
+      b.style.display="flex";
+      s.forEach(x=>{
+        var d=document.createElement("div");d.className="sai";
+        d.onclick=()=>openChan(x.name,x.url,x.avatar);
+        d.innerHTML=`<img src="${x.avatar}"><span>${x.name}</span>`;
+        b.appendChild(d);
       });
     }
 
-    // 4. KESİNTİSİZ ARAMA (@OKANKARALI VE HER ŞEY)
-    function openSearch() {
-      document.getElementById("searchWrap").style.display = "flex";
-      document.getElementById("searchInput").focus();
-    }
+    // 5. ARAMA (@HANDLE SINIRSIZ)
+    function openSrch(){gid("srchW").style.display="flex";gid("srchI").focus()}
+    function closeSrch(){gid("srchW").style.display="none"}
+    async function doSrch(){
+      var q=gid("srchI").value.trim();if(!q)return;
+      closeSrch();
+      var f=gid("vList");
+      f.innerHTML=`<div class="ld">"${q}" aranıyor...</div>`;
+      curNav='search';
+      nextPageToken=null;
+      lastQuery=q;
+      currentFeedTarget='vList';
 
-    function closeSearch() {
-      document.getElementById("searchWrap").style.display = "none";
-    }
+      try{
+        var r=await fetch(`${P}/search?q=${encodeURIComponent(q)}&filter=all`);
+        var d=await r.json();
+        f.innerHTML="";
+        if(!d.items||!d.items.length){f.innerHTML=`<div class="ld">Sonuç bulunamadı.</div>`;return}
 
-    async function executeSearch() {
-      let query = document.getElementById("searchInput").value.trim();
-      if (!query) return;
-
-      closeSearch();
-      const feed = document.getElementById("videoList");
-      feed.innerHTML = `<div class="loading">"${query}" aranıyor...</div>`;
-
-      try {
-        const res = await fetch(`${PIPED_API}/search?q=${encodeURIComponent(query)}&filter=all`);
-        const data = await res.json();
-        feed.innerHTML = "";
-
-        if (!data.items || data.items.length === 0) {
-          feed.innerHTML = `<div class="loading">Sonuç bulunamadı.</div>`;
-          return;
-        }
-
-        // Kanalları en üste koy
-        const channels = data.items.filter(i => i.type === 'channel');
-        channels.forEach(c => {
-          const card = document.createElement("div");
-          card.className = "search-channel-card";
-          card.innerHTML = `
-            <div class="search-chan-info" onclick="openChannelPage('${escapeQuotes(c.name)}', '${c.url}', '${c.thumbnail}')">
+        // Kanallar üstte
+        d.items.filter(i=>i.type==='channel').forEach(c=>{
+          var cd=document.createElement("div");cd.className="scc";
+          cd.innerHTML=`
+            <div class="sci" onclick="openChan('${esc(c.name)}','${c.url}','${c.thumbnail}')">
               <img src="${c.thumbnail}">
-              <div>
-                <div style="font-weight: 600; font-size:1.05rem;">${c.name}</div>
-                <div style="font-size: 0.8rem; color: #606060;">${c.subscribers ? c.subscribers + ' abone • ' : ''}YouTube Kanalı</div>
-              </div>
+              <div><div style="font-weight:600;font-size:1.05rem">${c.name}</div>
+              <div style="font-size:.8rem;color:#606060">${c.subscribers?c.subscribers+' abone • ':''}YouTube Kanalı</div></div>
             </div>
-            <button class="btn-subscribe" onclick="toggleSub('${escapeQuotes(c.name)}', '${c.url}', '${c.thumbnail}')">Abone Ol</button>
-          `;
-          feed.appendChild(card);
+            <button class="bsub" onclick="togSub('${esc(c.name)}','${c.url}','${c.thumbnail}')">Abone Ol</button>`;
+          f.appendChild(cd);
         });
 
-        // Videoları listele
-        const streams = data.items.filter(i => i.type === 'stream');
-        if (streams.length > 0) {
-          const listDiv = document.createElement("div");
-          renderFeed(listDiv, streams);
-          feed.appendChild(listDiv);
+        // Videolar
+        var streams=d.items.filter(i=>i.type==='stream');
+        nextPageToken=d.nextpage||null;
+        streams.forEach(item=>appendCard(f,item));
+      }catch(e){f.innerHTML=`<div class="ld">Arama yapılamadı.</div>`}
+    }
+
+    // 6. SHORTS (60 saniyenin altındaki videolar)
+    async function initS(){
+      gid("sIf").src="";
+      gid("sTt").textContent="Shorts yükleniyor...";
+      gid("sCh").textContent="";
+
+      // İzin verilen konulardan kısa video ara
+      var kw=KW[Math.floor(Math.random()*KW.length)];
+      try{
+        var r=await fetch(`${P}/search?q=${encodeURIComponent(kw)}&filter=videos`);
+        var d=await r.json();
+        // 60 saniyenin altındaki videoları Shorts olarak göster
+        var shorts=(d.items||[]).filter(i=>i.type==='stream'&&i.duration>0&&i.duration<=180);
+
+        // Yeterli kısa video yoksa tümünden al
+        if(shorts.length<3){
+          shorts=(d.items||[]).filter(i=>i.type==='stream'&&i.duration>0).slice(0,10);
         }
-      } catch (e) {
-        feed.innerHTML = `<div class="loading">Arama sırasında hata oluştu.</div>`;
-      }
-    }
 
-    // 5. KOTASIZ VE TAKILMAYAN SHORTS MOTORU
-    async function initShorts() {
-      const iframe = document.getElementById("shortIframe");
-      iframe.src = "";
-      document.getElementById("shortTitle").textContent = "Shorts yükleniyor...";
-      document.getElementById("shortChannel").textContent = "";
-
-      try {
-        const res = await fetch(`${PIPED_API}/search?q=karadeniz%20shorts&filter=all`);
-        const data = await res.json();
-        const shorts = (data.items || []).filter(i => i.type === 'stream');
-        
-        if (shorts.length > 0) {
-          shortsList = shorts;
-          currentShortIndex = 0;
-          displayCurrentShort();
+        if(shorts.length>0){
+          sL=shorts;sI=0;dispS();
+        }else{
+          gid("sTt").textContent="Shorts bulunamadı. Başka konuyu deneyin.";
         }
-      } catch (e) {
-        document.getElementById("shortTitle").textContent = "Shorts yüklenemedi.";
+      }catch(e){gid("sTt").textContent="Shorts yüklenemedi."}
+    }
+
+    function dispS(){
+      if(!sL.length)return;
+      var it=sL[sI], id=vid(it.url);
+      curSC=it.uploaderName||'';
+      curSA=it.uploaderAvatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(curSC)}`;
+      gid("sIf").src=`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+      gid("sTt").textContent=it.title;
+      gid("sCh").textContent=curSC;
+      gid("sAv").src=curSA;
+      updSub("sSb",curSC);
+    }
+    function nxtS(){if(sI<sL.length-1)sI++;else{sI=0;initS();return}dispS()}
+    function prvS(){if(sI>0){sI--;dispS()}}
+    function stopS(){gid("sIf").src=""}
+
+    // 7. ALT MENÜ
+    function nav(n){
+      curNav=n;
+      document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
+      gid("wV").style.display="none";
+      gid("cV").style.display="none";
+      gid("wIf").src="";
+      stopS();
+      gid("sV").style.display="none";
+      gid("subBar").style.display="none";
+      nextPageToken=null;
+
+      if(n==='home'){gid("bH").classList.add("ac");loadHome()}
+      else if(n==='shorts'){gid("bS").classList.add("ac");gid("sV").style.display="block";initS()}
+      else if(n==='subs'){gid("bA").classList.add("ac");renderSBar();loadSubF()}
+    }
+    async function loadSubF(){
+      var f=gid("vList"),s=getSubs();
+      if(!s.length){f.innerHTML=`<div class="ld">Henüz abone olduğunuz kanal yok.<br>Üstteki büyütece <b>@okankarali</b> yazarak abone olabilirsiniz.</div>`;return}
+      f.innerHTML=`<div class="ld">Abonelikleriniz yükleniyor...</div>`;
+      var sub=s[Math.floor(Math.random()*s.length)];
+
+      if(sub.url&&sub.url.includes('/channel/')){
+        var cid=sub.url.replace('/channel/','');
+        try{
+          var r=await fetch(`${P}/channel/${cid}`);
+          var d=await r.json();
+          if(d.relatedStreams&&d.relatedStreams.length>0){renderFeed(f,d.relatedStreams,false);return}
+        }catch(e){}
       }
+      try{
+        var r2=await fetch(`${P}/search?q=${encodeURIComponent(sub.name)}&filter=videos`);
+        var d2=await r2.json();
+        renderFeed(f,(d2.items||[]).filter(i=>i.type==='stream'),false);
+      }catch(e){f.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
     }
 
-    function displayCurrentShort() {
-      if (!shortsList || shortsList.length === 0) return;
-      const item = shortsList[currentShortIndex];
-      const videoId = extractVideoId(item.url);
+    // SERVICE WORKER (PWA Yükleme İçin)
+    if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-      currentShortChannel = item.uploaderName || '';
-      currentShortAvatar = item.uploaderAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentShortChannel)}`;
-
-      const iframe = document.getElementById("shortIframe");
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1`;
-
-      document.getElementById("shortTitle").textContent = item.title;
-      document.getElementById("shortChannel").textContent = currentShortChannel;
-      document.getElementById("shortAvatar").src = currentShortAvatar;
-
-      updateSubButtonUI("shortSubBtn", currentShortChannel);
-    }
-
-    function nextShort() {
-      if (currentShortIndex < shortsList.length - 1) {
-        currentShortIndex++;
-      } else {
-        currentShortIndex = 0;
-      }
-      displayCurrentShort();
-    }
-
-    function prevShort() {
-      if (currentShortIndex > 0) {
-        currentShortIndex--;
-        displayCurrentShort();
-      }
-    }
-
-    function stopShortsAudio() {
-      const iframe = document.getElementById("shortIframe");
-      if (iframe) iframe.src = "";
-    }
-
-    // 6. ALT MENÜ
-    function switchNav(nav) {
-      currentNav = nav;
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      
-      document.getElementById("watchView").style.display = "none";
-      document.getElementById("channelView").style.display = "none";
-      document.getElementById("watchIframe").src = "";
-
-      stopShortsAudio();
-      document.getElementById("shortsView").style.display = "none";
-      document.getElementById("subsBar").style.display = "none";
-
-      if (nav === 'home') {
-        document.getElementById("btnHome").classList.add("active");
-        loadHomeFeed();
-      } else if (nav === 'shorts') {
-        document.getElementById("btnShorts").classList.add("active");
-        document.getElementById("shortsView").style.display = "block";
-        initShorts();
-      } else if (nav === 'subs') {
-        document.getElementById("btnSubs").classList.add("active");
-        renderSubsBar();
-        loadSubsFeed();
-      }
-    }
-
-    async function loadSubsFeed() {
-      const feed = document.getElementById("videoList");
-      const subs = getSubs();
-      if (subs.length === 0) {
-        feed.innerHTML = `<div class="loading">Henüz abone olduğunuz kanal yok.<br>Üstteki büyütece <b>@okankarali</b> yazarak abone olabilirsiniz.</div>`;
-        return;
-      }
-      feed.innerHTML = `<div class="loading">Abonelikleriniz yükleniyor...</div>`;
-      const s = subs[Math.floor(Math.random() * subs.length)];
-      openChannelPage(s.name, s.url, s.avatar);
-    }
-
-    // Başlangıçta ana sayfayı aç
-    loadHomeFeed();
+    // Başlangıç
+    loadHome();
   </script>
 </body>
 </html>
