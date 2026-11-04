@@ -1292,17 +1292,29 @@
         gid("cpMt").textContent=(d.subscriberCount>0?fmtV(d.subscriberCount)+' abone':'')+(d.verified?' • Onaylı':'');
         gid("cpDs").textContent=d.description||'';
         var fill=function(i){i.uploaderName=i.uploaderName||d.name||n;i.uploaderUrl=i.uploaderUrl||u;i.uploaderAvatar=i.uploaderAvatar||curCA;return i};
-        var vids=(d.relatedStreams||[]).filter(function(i){return i.type==='stream'}).map(fill);
-        if(vids.length){ renderFeed(vL,vids,false); chanMoreBtn(); }
-        else vL.innerHTML=`<div class="ld">Bu kanalda video bulunamadı.</div>`;
-
         var tabs=d.tabs||[];
         var getTab=async function(name){
           var t=tabs.find(function(x){return (x.name||'').toLowerCase()===name});
           if(!t||!t.data) return null;
           try{var r=await (await apiFetch(`${P}/channels/tabs?data=${encodeURIComponent(t.data)}`)).json();
+              if(name==='videos'&&r.nextpage) chanNext=r.nextpage;
               return (r.content||[]).filter(function(i){return i.url&&i.url.indexOf('v=')>-1}).map(fill);}catch(e){return null}
         };
+        var vids=(d.relatedStreams||[]).filter(function(i){return i.type==='stream'}).map(fill);
+        // Yeni Piped sürümlerinde videolar "videos" sekmesinde gelir
+        if(!vids.length){ var tv=await getTab('videos'); if(tv) vids=tv; }
+        // Hâlâ boşsa kanal adıyla arayıp o kanalın videolarını süz
+        if(!vids.length){
+          try{
+            var rv=await (await apiFetch(`${P}/search?q=${encodeURIComponent(d.name||n)}&filter=videos`)).json();
+            vids=(rv.items||[]).filter(function(i){return i.type==='stream'&&(i.uploaderUrl===u||(i.uploaderName||'')===(d.name||n))}).map(fill);
+            chanNext=null;
+          }catch(e){}
+        }
+        if(my!==chanReq) return;
+        if(vids.length){ renderFeed(vL,vids,false); chanMoreBtn(); }
+        else vL.innerHTML=`<div class="ld">Bu kanalda video bulunamadı.</div>`;
+
         var res=await Promise.all([getTab('shorts'),getTab('livestreams')]);
         if(my!==chanReq) return;
         var sh=res[0];
