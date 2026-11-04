@@ -11,10 +11,11 @@
   <meta name="apple-mobile-web-app-title" content="YouTube">
   <meta name="application-name" content="YouTube">
   
-  <!-- YouTube Logosu (Ana Ekran İkonu) -->
-  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png">
-  <link rel="manifest" href='data:application/manifest+json,{"name":"YouTube","short_name":"YouTube","start_url":".","display":"standalone","background_color":"%23ffffff","theme_color":"%23ffffff","icons":[{"src":"https://www.gstatic.com/youtube/img/web/monogram/player/youtube_fill-192x192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"}]}'>
+  <!-- YouTube Logosu (Resmi Google Maskable İkonları - 192x192 ve 512x512) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/youtube/img/branding/favicon/favicon_192x192_v2.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="https://www.gstatic.com/youtube/img/web/maskable/logo_192x192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="https://www.gstatic.com/youtube/img/web/maskable/logo_512x512.png">
+  <link rel="manifest" href="manifest.json">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -23,14 +24,14 @@
     body{background:#fff;color:#0f0f0f;padding-bottom:56px;overflow-x:hidden}
 
     /* ÜST BAR */
-    .yt-h{position:sticky;top:0;z-index:100;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #e5e5e5}
+    .yt-h{position:sticky;top:0;height:48px;z-index:250;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #e5e5e5}
     .yt-logo{display:flex;align-items:center;gap:4px;font-weight:700;font-size:1.25rem;letter-spacing:-.8px;color:#0f0f0f;cursor:pointer;-webkit-user-select:none;user-select:none}
     .yt-logo i{color:#ff0000;font-size:1.6rem}
     .hi{display:flex;align-items:center;gap:20px;font-size:1.15rem;color:#0f0f0f}
     .pav{width:28px;height:28px;border-radius:50%;background:#00796b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:bold}
 
     /* ARAMA */
-    .srch{display:none;position:fixed;top:0;left:0;right:0;background:#fff;padding:8px 12px;z-index:250;box-shadow:0 2px 6px rgba(0,0,0,.1);align-items:center;gap:10px}
+    .srch{display:none;position:fixed;top:0;left:0;right:0;background:#fff;padding:6px 12px;z-index:350;box-shadow:0 2px 6px rgba(0,0,0,.1);align-items:center;gap:10px;height:48px}
     .srch input{flex:1;border:1px solid #ccc;background:#f8f8f8;border-radius:20px;padding:9px 16px;font-size:.95rem;outline:none}
     .srch button{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#333}
 
@@ -104,8 +105,8 @@
     .ch img{width:75px;height:75px;border-radius:50%;margin-bottom:10px;object-fit:cover}
     .ch h2{font-size:1.25rem}
 
-    /* SHORTS TAM EKRAN VE KAYDIRMA ALANI */
-    .sv{display:none;position:fixed;top:0;left:0;right:0;bottom:52px;background:#000;z-index:150;overflow:hidden}
+    /* SHORTS TAM EKRAN VE KAYDIRMA ALANI (Üst bar ve Alt bar arasında tam oturur) */
+    .sv{display:none;position:fixed;top:48px;left:0;right:0;bottom:52px;background:#000;z-index:150;overflow:hidden}
     .sfw{width:100%;height:100%;position:relative;overflow:hidden;will-change:transform}
     .s-poster{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;filter:brightness(0.9)}
     .sfw iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:2}
@@ -229,6 +230,21 @@
         <button class="scb" onclick="slideNext()"><i class="fa-solid fa-chevron-down"></i></button>
         <button class="scb" id="sLikeBtn" onclick="toggleShortLike()"><i class="fa-solid fa-thumbs-up"></i></button>
       </div>
+    </div>
+  </div>
+
+  <!-- UYGULAMAYI YÜKLE BİLDİRİMİ (Tarayıcı kurulumu desteklediğinde çıkar) -->
+  <div id="instB" style="display:none;position:fixed;bottom:64px;left:12px;right:12px;background:#0f0f0f;color:#fff;padding:10px 14px;border-radius:12px;z-index:400;box-shadow:0 4px 16px rgba(0,0,0,0.35);align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="https://www.gstatic.com/youtube/img/branding/favicon/favicon_192x192_v2.png" style="width:34px;height:34px;border-radius:8px">
+      <div>
+        <div style="font-weight:600;font-size:.88rem">YouTube</div>
+        <div style="font-size:.72rem;color:#aaa">Uygulamayı telefona yükleyin</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="doInstall()" style="background:#cc0000;color:#fff;border:none;padding:6px 14px;border-radius:18px;font-weight:bold;font-size:.78rem;cursor:pointer">Yükle</button>
+      <button onclick="gid('instB').style.display='none'" style="background:none;border:none;color:#aaa;font-size:1.2rem;cursor:pointer;padding:0 4px">&times;</button>
     </div>
   </div>
 
@@ -570,6 +586,11 @@
     async function doSrch(){
       var q=gid("srchI").value.trim();if(!q)return;
       closeSrch();
+      stopS();
+      gid("sV").style.display="none";
+      gid("wV").style.display="none";
+      gid("cV").style.display="none";
+      document.querySelectorAll('.nb').forEach(b=>b.classList.remove('ac'));
       var f=gid("vList");
       f.innerHTML=`<div class="ld">"${q}" aranıyor...</div>`;
       curNav='search';
@@ -866,6 +887,26 @@
         var d2=await r2.json();
         renderFeed(f,(d2.items||[]).filter(i=>i.type==='stream'),false);
       }catch(e){f.innerHTML=`<div class="ld">Videolar yüklenemedi.</div>`}
+    }
+
+    // PWA YÜKLEME (BEFOREINSTALLPROMPT) DESTEĞİ
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault();
+      deferredPrompt = e;
+      var b = gid("instB");
+      if(b) b.style.display = "flex";
+    });
+
+    function doInstall(){
+      if(deferredPrompt){
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){
+          deferredPrompt = null;
+          var b = gid("instB");
+          if(b) b.style.display = "none";
+        });
+      }
     }
 
     // SERVICE WORKER
